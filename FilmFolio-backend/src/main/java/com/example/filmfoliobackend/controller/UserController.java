@@ -7,10 +7,7 @@ import com.example.filmfoliobackend.service.AuthenticationService;
 import com.example.filmfoliobackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -29,5 +26,17 @@ public class UserController {
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
         AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
         return ResponseEntity.ok(authenticationResponse);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserDto> getUserInfo(@RequestParam String username) {
+        UserDto userInfo = userService.getUserInfo(username);
+        return ResponseEntity.ok(userInfo);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<UserDto> updateUserInfo(@RequestParam String username, @RequestBody UserDto updatedUserDto) {
+        UserDto updatedUserInfo = userService.updateUserInfo(username, updatedUserDto);
+        return ResponseEntity.ok(updatedUserInfo);
     }
 }

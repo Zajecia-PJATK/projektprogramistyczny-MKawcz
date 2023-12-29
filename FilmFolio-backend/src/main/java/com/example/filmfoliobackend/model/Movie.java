@@ -14,16 +14,16 @@ public class Movie {
     private String idMovie;
     private Long tmdbIdMovie;
     private String title;
-    private String overview;
+//    private String overview;
     private String posterPath;
-    private String backdropPath;
-    private Double voteAverage;     //możliwe że trzeba będzie pobierać z api a nie zapisywać w bazie
-    private Integer voteCount;
-    private Double appVoteAverage; // Średnia ocen z filmFolio
-    private Integer appVoteCount; // Liczba ocen z filmFolio
+//    private String backdropPath;
+//    private Double voteAverage;     //możliwe że trzeba będzie pobierać z api a nie zapisywać w bazie
+//    private Integer voteCount;
+//    private Double appVoteAverage; // Średnia ocen z filmFolio
+//    private Integer appVoteCount; // Liczba ocen z filmFolio
     private String releaseDate;
-    private Integer runtime;
-    private Boolean adult;
+//    private Integer runtime;
+//    private Boolean adult;
     @DBRef
     private List<Genre> genres;
     @DBRef

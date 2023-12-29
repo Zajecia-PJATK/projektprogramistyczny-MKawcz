@@ -1,7 +1,6 @@
 package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.MovieDto;
-import com.example.filmfoliobackend.model.Movie;
 import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.response.TMDBResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,30 +32,16 @@ public class MovieService {
         return response.getBody().getResults();
     }
 
-    public MovieDto getMovie(Long id) {
-        String url = String.format("%s/movie/%d?language=en-US&api_key=%s", apiUrl, id, apiKey);
+    public MovieDto getMovie(Long tmdbId) {
+        String url = String.format("%s/movie/%d?language=en-US&api_key=%s", apiUrl, tmdbId, apiKey);
         ResponseEntity<MovieDto> response = restTemplate.getForEntity(url, MovieDto.class);
 
         if(response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No movie found with the given id: " + id);
+            throw new RuntimeException("No movie found with the given TMDB id: " + tmdbId);
         }
 
-//        Movie movie = new Movie();
-//        movie.setTmdbIdMovie(movieDto.getTmdbIdMovie());
-//        movie.setTitle(movieDto.getTitle());
-//        movie.setOverview(movieDto.getOverview());
-//        movie.setPosterPath(movieDto.getPosterPath());
-//        movie.setBackdropPath(movieDto.getBackdropPath());
-//        movie.setVoteAverage(movieDto.getVoteAverage());
-//        movie.setVoteCount(movieDto.getVoteCount());
-//        movie.setReleaseDate(movieDto.getReleaseDate());
-//        movie.setRuntime(movieDto.getRuntime());
-//        movie.setAdult(movieDto.getAdult());
-//
-//        movieRepository.save(movie);
 
-
-// TODO trzeba będzie tu dodać zamianę genre_ids i pobieranie ich po id, żeby je wyświetlić
+        // TODO trzeba będzie tu dodać zamianę genre_ids i pobieranie ich po id, żeby je wyświetlić
 
         return response.getBody();
     }
