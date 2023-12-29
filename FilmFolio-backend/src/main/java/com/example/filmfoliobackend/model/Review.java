@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 public class Review {
     @Id
-    private Long idReview;
+    private String idReview;
     @DBRef
     private User user;
     @DBRef

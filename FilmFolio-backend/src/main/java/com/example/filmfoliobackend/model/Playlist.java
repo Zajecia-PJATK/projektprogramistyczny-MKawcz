@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class Playlist {
     @Id
-    private Long idPlaylist;
+    private String idPlaylist;
     private String name;
     private String description;
     @DBRef

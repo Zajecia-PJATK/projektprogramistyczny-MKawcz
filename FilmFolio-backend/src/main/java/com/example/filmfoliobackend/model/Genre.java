@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class Genre {
     @Id
-    private Long idGenre;
+    private String idGenre;
     private Long tmdbIdGenre;
     private String name;
     @DBRef

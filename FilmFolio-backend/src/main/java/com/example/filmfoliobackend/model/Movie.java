@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class Movie {
     @Id
-    private Long idMovie;
+    private String idMovie;
     private Long tmdbIdMovie;
     private String title;
     private String overview;
