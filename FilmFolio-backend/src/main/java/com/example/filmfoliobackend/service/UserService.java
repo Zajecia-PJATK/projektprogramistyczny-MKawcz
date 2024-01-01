@@ -12,36 +12,34 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     public UserDto getUserInfo(String username) {
-        var optionalUser = userRepository.findByUsername(username);
-
-        if(optionalUser.isEmpty()) {
-            throw new RuntimeException("No user with the given username");
-        }
-
-        User user = optionalUser.get();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));;
 
         UserDto userDto = new UserDto();
-        userDto.setUsername(user.getUsername());
+        userDto.setUsername(user.getActualUsername());
         userDto.setEmail(user.getEmail());
 
         return userDto;
     }
 
     public UserDto updateUserInfo(String username, UserDto updatedUserDto) {
-        var optionalUser = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
 
-        if(optionalUser.isEmpty()) {
-            throw new RuntimeException("No user with the given username");
+        if(userRepository.existsByUsername(updatedUserDto.getUsername())) {
+            throw new RuntimeException("User with the given username already exists");
         }
-        //TODO sprawdz czy mail i nazwa nie są już zajęte !!!!!!
 
-        User user = optionalUser.get();
+        if(userRepository.existsByEmail(updatedUserDto.getEmail())) {
+            throw new RuntimeException("User with the given email already exists");
+        }
+
         user.setUsername(updatedUserDto.getUsername());
         user.setEmail(updatedUserDto.getEmail());
 
         User updatedUser = userRepository.save(user);
 
-        return getUserInfo(updatedUser.getUsername());
+        return getUserInfo(updatedUser.getActualUsername());
     }
 
 

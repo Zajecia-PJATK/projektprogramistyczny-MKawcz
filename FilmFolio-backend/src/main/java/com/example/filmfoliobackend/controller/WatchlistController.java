@@ -26,9 +26,9 @@ public class WatchlistController {
         return ResponseEntity.ok(userWatchlist);
     }
 
-    @DeleteMapping("/{movieId}")
-    public ResponseEntity<List<MovieDto>> deleteMovieFromWatchlist(@RequestParam String username, @PathVariable String movieId) {
-        List<MovieDto> userWatchlist = watchlistService.deleteMovieFromWatchlist(username, movieId);
+    @DeleteMapping("/{tmdbIdMovie}")
+    public ResponseEntity<List<MovieDto>> deleteMovieFromWatchlist(@RequestParam String username, @PathVariable Long tmdbIdMovie) {
+        List<MovieDto> userWatchlist = watchlistService.deleteMovieFromWatchlist(username, tmdbIdMovie);
         return ResponseEntity.ok(userWatchlist);
     }
 }

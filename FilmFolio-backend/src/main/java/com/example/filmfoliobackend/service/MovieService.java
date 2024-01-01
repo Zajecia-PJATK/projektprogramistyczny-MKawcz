@@ -2,6 +2,8 @@ package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.repository.MovieRepository;
+import com.example.filmfoliobackend.repository.ReviewRepository;
+import com.example.filmfoliobackend.repository.UserRepository;
 import com.example.filmfoliobackend.response.TMDBResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovieService {
     private final RestTemplate restTemplate;
-    private final MovieRepository movieRepository;
+
     @Value("${tmdb.api.key}")
     private String apiKey;
     @Value("${tmdb.api.url}")
@@ -32,12 +34,12 @@ public class MovieService {
         return response.getBody().getResults();
     }
 
-    public MovieDto getMovie(Long tmdbId) {
-        String url = String.format("%s/movie/%d?language=en-US&api_key=%s", apiUrl, tmdbId, apiKey);
+    public MovieDto getMovie(Long tmdbIdMovie) {
+        String url = String.format("%s/movie/%d?language=en-US&api_key=%s", apiUrl, tmdbIdMovie, apiKey);
         ResponseEntity<MovieDto> response = restTemplate.getForEntity(url, MovieDto.class);
 
         if(response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No movie found with the given TMDB id: " + tmdbId);
+            throw new RuntimeException("No movie found with the given TMDB id: " + tmdbIdMovie);
         }
 
 
@@ -56,4 +58,5 @@ public class MovieService {
 
         return response.getBody().getResults();
     }
+
 }

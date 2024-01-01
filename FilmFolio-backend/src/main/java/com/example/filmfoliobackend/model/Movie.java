@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Document
@@ -25,11 +26,11 @@ public class Movie {
 //    private Integer runtime;
 //    private Boolean adult;
     @DBRef
-    private List<Genre> genres;
+    private List<Genre> genres = new ArrayList<>();
     @DBRef
-    private List<Playlist> playlists;
+    private List<Playlist> playlists = new ArrayList<>();
     @DBRef
-    private List<User> users;
+    private List<User> users = new ArrayList<>();
     @DBRef
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
 }

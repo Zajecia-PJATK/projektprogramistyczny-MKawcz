@@ -1,6 +1,7 @@
 package com.example.filmfoliobackend.controller;
 
 import com.example.filmfoliobackend.dto.MovieDto;
+import com.example.filmfoliobackend.dto.ReviewDto;
 import com.example.filmfoliobackend.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,6 @@ public class MovieController {
         List<MovieDto> searchResults = movieService.searchMoviesByTitle(query, includeAdult);
         return ResponseEntity.ok(searchResults);
     }
-
 
 }
 

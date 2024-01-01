@@ -28,11 +28,15 @@ public class User implements UserDetails {
     private String password;
     private Set<Role> roles = new HashSet<>();
     @DBRef
-    private List<Movie> watchlist;
+    private List<Movie> watchlist = new ArrayList<>();;
     @DBRef
-    private List<Playlist> playlists;
+    private List<Playlist> playlists = new ArrayList<>();
     @DBRef
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
+
+    public String getActualUsername() {
+        return username;
+    }
 
     @Override
     public String getPassword() {

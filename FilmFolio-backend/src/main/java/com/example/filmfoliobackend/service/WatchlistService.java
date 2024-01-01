@@ -19,17 +19,13 @@ public class WatchlistService {
     private final MovieRepository movieRepository;
 
     public List<MovieDto> getUserWatchlist(String username) {
-        var optionalUser = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
 
-        if(optionalUser.isEmpty()) {
-            throw new RuntimeException("No user with the given username");
-        }
 
-        User user = optionalUser.get();
+        List<MovieDto> watchlistDto = user.getWatchlist().stream().map(MovieMapper::toDto).toList();
 
-        List<MovieDto> mappedMovieDtos = user.getWatchlist().stream().map(MovieMapper::toDto).toList();
-
-        return mappedMovieDtos;
+        return watchlistDto;
     }
 
     public List<MovieDto> addMovieToWatchlist(String username, MovieDto movieDto) {
@@ -39,29 +35,26 @@ public class WatchlistService {
         Movie movie = movieRepository.findByTmdbIdMovie(movieDto.getTmdbIdMovie())
                 .orElseGet(() -> MovieMapper.toDocument(movieDto));
 
-        user.getWatchlist().add(movie);
         movie.getUsers().add(user);
-
-        userRepository.save(user);
         movieRepository.save(movie);
+
+        user.getWatchlist().add(movie);
+        userRepository.save(user);
+
 
         return getUserWatchlist(username);
     }
 
-    public List<MovieDto> deleteMovieFromWatchlist(String username, String movieId) {
-        var optionalUser = userRepository.findByUsername(username);
-        var optionalMovie = movieRepository.findByIdMovie(movieId);
+    public List<MovieDto> deleteMovieFromWatchlist(String username, Long tmdbIdMovie) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
 
-        if(optionalUser.isEmpty()) {
-            throw new RuntimeException("No user with the given username");
+        Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdMovie)
+                .orElseThrow(() -> new RuntimeException("No user found with TMDB id: " + tmdbIdMovie));
+
+        if(!userRepository.existsByIdUserAndWatchlistTmdbIdMovie(user.getIdUser(), tmdbIdMovie)) {
+            throw new RuntimeException("Movie with the given TMDB id doesn't belong to the watchlist of the users with the given id");
         }
-
-        if(optionalMovie.isEmpty()) {
-            throw new RuntimeException("No movie with the given id");
-        }
-
-        User user = optionalUser.get();
-        Movie movie = optionalMovie.get();
 
         user.getWatchlist().remove(movie);
         movie.getUsers().remove(user);
