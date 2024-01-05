@@ -1,9 +1,9 @@
 package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.MovieDto;
-import com.example.filmfoliobackend.repository.MovieRepository;
-import com.example.filmfoliobackend.repository.ReviewRepository;
-import com.example.filmfoliobackend.repository.UserRepository;
+import com.example.filmfoliobackend.exception.ExternalServiceException;
+import com.example.filmfoliobackend.exception.InvalidRequestException;
+import com.example.filmfoliobackend.exception.ResourceNotFoundException;
 import com.example.filmfoliobackend.response.TMDBResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +29,7 @@ public class MovieService {
         ResponseEntity<TMDBResponse> response = restTemplate.getForEntity(url, TMDBResponse.class);
 
         if(response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No popular movies found");
+            throw new ExternalServiceException("Failed to retrieve popular movies from TMDB");
         }
         return response.getBody().getResults();
     }
@@ -39,11 +39,10 @@ public class MovieService {
         ResponseEntity<MovieDto> response = restTemplate.getForEntity(url, MovieDto.class);
 
         if(response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No movie found with the given TMDB id: " + tmdbIdMovie);
+            throw new ResourceNotFoundException("No movie found with the TMDB id: " + tmdbIdMovie);
         }
 
-
-        // TODO trzeba będzie tu dodać zamianę genre_ids i pobieranie ich po id, żeby je wyświetlić
+        //TODO trzeba będzie tu dodać zamianę genre_ids i pobieranie ich po id, żeby je wyświetlić
 
         return response.getBody();
     }
@@ -53,7 +52,7 @@ public class MovieService {
         ResponseEntity<TMDBResponse> response = restTemplate.getForEntity(url, TMDBResponse.class);
 
         if(response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No results for the given search");
+            throw new InvalidRequestException("Query string cannot be empty");
         }
 
         return response.getBody().getResults();

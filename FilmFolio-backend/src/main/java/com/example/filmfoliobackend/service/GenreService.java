@@ -2,6 +2,7 @@ package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.GenreDto;
 import com.example.filmfoliobackend.dto.MovieDto;
+import com.example.filmfoliobackend.exception.ExternalServiceException;
 import com.example.filmfoliobackend.repository.GenreRepository;
 import com.example.filmfoliobackend.response.GenresResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreService {
     private final RestTemplate restTemplate;
-    private final GenreRepository genreRepository;
+//    private final GenreRepository genreRepository;
     @Value("${tmdb.api.key}")
     private String apiKey;
     @Value("${tmdb.api.url}")
@@ -29,7 +30,7 @@ public class GenreService {
         ResponseEntity<GenresResponse> response = restTemplate.getForEntity(url, GenresResponse.class);
 
         if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
-            throw new RuntimeException("No genres found");
+            throw new ExternalServiceException("Failed to retrieve movie genres from TMDB");
         }
 
         return response.getBody().getGenres();

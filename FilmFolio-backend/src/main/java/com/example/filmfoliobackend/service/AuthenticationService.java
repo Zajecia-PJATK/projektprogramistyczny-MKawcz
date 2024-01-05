@@ -2,6 +2,8 @@ package com.example.filmfoliobackend.service;
 
 
 import com.example.filmfoliobackend.dto.UserDto;
+import com.example.filmfoliobackend.exception.DuplicateResourceException;
+import com.example.filmfoliobackend.exception.UserNotFoundException;
 import com.example.filmfoliobackend.jwt.JwtTokenProvider;
 import com.example.filmfoliobackend.model.User;
 import com.example.filmfoliobackend.model.enums.Role;
@@ -27,11 +29,11 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(UserDto userDto) {
         if (userRepository.existsByUsername(userDto.getUsername())) {
-            throw new RuntimeException("User with a given username already exists");
+            throw new DuplicateResourceException("Username is already taken");
         }
 
         if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("User with a given email already exists");
+            throw new DuplicateResourceException("Email is already taken");
         }
 
         var user = User.builder()
@@ -55,7 +57,7 @@ public class AuthenticationService {
                 )
         );
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User with the given email could not be found"));
+                .orElseThrow(() -> new UserNotFoundException("No user with the given email " + request.getEmail()));
         var jwtToken = jwtTokenProvider.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)

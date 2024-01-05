@@ -2,6 +2,7 @@ package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.PlaylistDto;
+import com.example.filmfoliobackend.exception.*;
 import com.example.filmfoliobackend.mapper.MovieMapper;
 import com.example.filmfoliobackend.mapper.PlaylistMapper;
 import com.example.filmfoliobackend.model.Movie;
@@ -24,7 +25,7 @@ public class PlaylistService {
 
     public List<PlaylistDto> getPlaylists(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         List<PlaylistDto> playlistsDto = user.getPlaylists().stream().map(PlaylistMapper::toDto).toList();
 
@@ -33,10 +34,10 @@ public class PlaylistService {
 
     public PlaylistDto createPlaylist(String username, PlaylistDto playlistDto) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         if(playlistRepository.existsByName(playlistDto.getName())) {
-            throw new RuntimeException("Playlist with the given name already exists: " + playlistDto.getName());
+            throw new DuplicateResourceException("Playlist with the name already exists: " + playlistDto.getName());
         }
 
         Playlist playlist = PlaylistMapper.toDocument(playlistDto);
@@ -49,21 +50,20 @@ public class PlaylistService {
         return PlaylistMapper.toDto(playlist);
     }
 
-    public PlaylistDto updatePlaylist(String username, String playlistId , PlaylistDto playlistDto) {
+    public PlaylistDto updatePlaylist(String username, String playlistId , PlaylistDto playlistDto) {   //TODO po stronie Fronta trzeba będzie dać domyślne wartości (te które są zapisane obecnie) aby nie ustawiać pól na null dla pól dla, których nie podano wartości
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
-
-
-        if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
-            throw new RuntimeException("Playlist with the given id doesn't belong to the user with the given id");
-        }
-
-        if(playlistRepository.existsByName(playlistDto.getName())) {
-            throw new RuntimeException("Playlist with the given name already exists: " + playlistDto.getName());
-        }
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
-                .orElseThrow(() -> new RuntimeException("No playlist with the given id : " + playlistId));
+                .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
+
+        if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + username);
+        }
+
+        if(!playlist.getName().equals(playlistDto.getName()) && playlistRepository.existsByName(playlistDto.getName())) {
+            throw new DuplicateResourceException("Playlist with the name " + playlistDto.getName() + " already exists: ");
+        }
 
         playlist.setName(playlistDto.getName());
         playlist.setDescription(playlistDto.getDescription());
@@ -75,34 +75,47 @@ public class PlaylistService {
 
     public List<PlaylistDto> deletePlaylist(String username, String playlistId) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
-                .orElseThrow(() -> new RuntimeException("No playlist with the given id : " + playlistId));
+                .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
 
         if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
-            throw new RuntimeException("Playlist with the given id doesn't belong to the user with the given id");
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + username);
         }
 
         user.getPlaylists().remove(playlist);
         userRepository.save(user);
+
+        for (Movie movie : playlist.getMovies()) {
+            movie.getPlaylists().remove(playlist);
+            movieRepository.save(movie);
+        }
+
         playlistRepository.delete(playlist);
 
         return getPlaylists(username);
     }
 
     public MovieDto addMovieToPlaylist(String username, String playlistId, MovieDto movieDto) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+        User user = userRepository.findByUsername(username)                                                 //TODO sprawdź czy we wszystkich metodach w których podajemy movieDto użytkownik nie ma możliwości utworzenia filmu
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         Movie movie = movieRepository.findByTmdbIdMovie(movieDto.getTmdbIdMovie())
                 .orElseGet(() -> MovieMapper.toDocument(movieDto));
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
-                .orElseThrow(() -> new RuntimeException("No playlist with the given id : " + playlistId));
+                .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
 
         if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
-            throw new RuntimeException("Playlist with the given id doesn't belong to the user with the given id");
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + username);
+        }
+
+        boolean isMoviePresentInPlaylist = playlist.getMovies().stream()
+                .anyMatch(m -> m.getTmdbIdMovie().equals(movie.getTmdbIdMovie()));
+
+        if(isMoviePresentInPlaylist) {
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " already has a movie with the TMDB id " + movie.getTmdbIdMovie());
         }
 
         movie.getPlaylists().add(playlist);
@@ -116,20 +129,27 @@ public class PlaylistService {
 
     public List<MovieDto> deleteMovieFromPlaylist(String username, String playlistId, Long tmdbIdMovie) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdMovie)
-                .orElseThrow(() -> new RuntimeException("No user found with TMDB id: " + tmdbIdMovie));
+                .orElseThrow(() -> new MovieNotFoundException("No movie found with TMDB id: " + tmdbIdMovie));
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
-                .orElseThrow(() -> new RuntimeException("No playlist with the given id : " + playlistId));
+                .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
 
         if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
-            throw new RuntimeException("Playlist with the given id doesn't belong to the user with the given id");
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + username);
         }
 
-        if(!playlistRepository.existsByIdPlaylistAndMoviesId(playlistId, tmdbIdMovie)) {
-            throw new RuntimeException("Movie with the given TMDB id doesn't belong to the playlist with the given id");
+//        if(!playlistRepository.existsByIdPlaylistAndMoviesTmdbIdMovie(playlistId, tmdbIdMovie)) {
+//            throw new RuntimeException("Movie with the TMDB id doesn't belong to the playlist with the id");
+//        }
+
+        boolean isMoviePresentInPlaylist = playlist.getMovies().stream()
+                .anyMatch(m -> m.getTmdbIdMovie().equals(tmdbIdMovie));
+
+        if(!isMoviePresentInPlaylist) {
+            throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not have a movie with the TMDB id " + movie.getTmdbIdMovie());
         }
 
         playlist.getMovies().remove(movie);

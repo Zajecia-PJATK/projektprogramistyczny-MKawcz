@@ -2,6 +2,10 @@ package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.ReviewDto;
+import com.example.filmfoliobackend.exception.MovieNotFoundException;
+import com.example.filmfoliobackend.exception.ResourceOwnershipException;
+import com.example.filmfoliobackend.exception.ReviewNotFoundException;
+import com.example.filmfoliobackend.exception.UserNotFoundException;
 import com.example.filmfoliobackend.mapper.ReviewMapper;
 import com.example.filmfoliobackend.model.Movie;
 import com.example.filmfoliobackend.model.Review;
@@ -47,7 +51,7 @@ public class ReviewService {
 
     public List<ReviewDto> getReviews(Long tmdbIdmovie) {
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdmovie)
-                .orElseThrow(() -> new RuntimeException("No movie in the database with TMDB id: " + tmdbIdmovie));
+                .orElseThrow(() -> new MovieNotFoundException("No movie found in the database with the TMDB id: " + tmdbIdmovie));
 
         List<ReviewDto> movieReviewsDto = movie.getReviews().stream().map(ReviewMapper::toDto).toList();
 
@@ -56,27 +60,36 @@ public class ReviewService {
 
     public List<ReviewDto> deleteReview(String username, Long tmdbIdmovie, String reviewId) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("No user found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdmovie)
-                .orElseThrow(() -> new RuntimeException("No movie in the database with TMDB id: " + tmdbIdmovie));
+                .orElseThrow(() -> new MovieNotFoundException("No movie found in the database with the TMDB id: " + tmdbIdmovie));
 
         Review review = reviewRepository.findByIdReview(reviewId)
-                .orElseThrow(() -> new RuntimeException("No review with given id: " + reviewId));
+                .orElseThrow(() -> new ReviewNotFoundException("No review found with id: " + reviewId));
 
-        if(!reviewRepository.existsByIdReviewAndUsername(reviewId, username)) {
-            throw new RuntimeException("Review with the given id does not belong to the user with given username");
+        if(!reviewRepository.existsByIdReviewAndUser(reviewId, user)) {
+            throw new ResourceOwnershipException("Review with ID " + reviewId + " does not belong to the user " + username);
         }
 
-        if(!reviewRepository.existsByIdReviewAndMovieTmdbIdMovie(reviewId, tmdbIdmovie)) {
-            throw new RuntimeException("Review with the given id does not belong to the movie with given TMDB id");
+//        if(!reviewRepository.existsByIdReviewAndMovieTmdbIdMovie(reviewId, tmdbIdmovie)) {
+//            throw new RuntimeException("Review with the id does not belong to the movie with TMDB id");
+//        }
+
+        boolean isReviewPresentInMovie = movie.getReviews().stream()
+                .anyMatch(r -> r.getIdReview().equals(reviewId));
+
+        if(!isReviewPresentInMovie) {
+            throw new ResourceOwnershipException("Review with ID " + reviewId + " does not belong to the movie with TMDB ID " + tmdbIdmovie);
         }
 
         movie.getReviews().remove(review);
         user.getReviews().remove(review);
 
+        movieRepository.save(movie);
+        userRepository.save(user);
         reviewRepository.delete(review);
 
-        return getReviews(tmdbIdmovie);
-    }
+        return movie.getReviews().stream().map(ReviewMapper::toDto).toList();
+    }   //TODO sprawdzić aby we wszystkich metodach nie zwracać innej metody serwisu!!!!!!
 }

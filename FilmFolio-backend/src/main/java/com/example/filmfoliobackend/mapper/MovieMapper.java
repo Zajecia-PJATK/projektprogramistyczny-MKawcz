@@ -8,8 +8,14 @@ public class MovieMapper {
         MovieDto dto = new MovieDto();
         dto.setTmdbIdMovie(movie.getTmdbIdMovie());
         dto.setTitle(movie.getTitle());
+        dto.setOverview(movie.getOverview());
         dto.setPosterPath(movie.getPosterPath());
+        dto.setBackdropPath(movie.getBackdropPath());
+        dto.setVoteAverage(movie.getVoteAverage());
+        dto.setVoteCount(movie.getVoteCount());
         dto.setReleaseDate(movie.getReleaseDate());
+        dto.setRuntime(movie.getRuntime());
+        dto.setAdult(movie.getAdult());
 
         return dto;
     }
@@ -18,8 +24,14 @@ public class MovieMapper {
         Movie movie = new Movie();
         movie.setTmdbIdMovie(dto.getTmdbIdMovie());
         movie.setTitle(dto.getTitle());
+        movie.setOverview(dto.getOverview());
         movie.setPosterPath(dto.getPosterPath());
+        movie.setPosterPath(dto.getBackdropPath());
+        movie.setVoteAverage(dto.getVoteAverage());
+        movie.setVoteCount(dto.getVoteCount());
         movie.setReleaseDate(dto.getReleaseDate());
+        movie.setRuntime(dto.getRuntime());
+        movie.setAdult(dto.getAdult());
 
         return movie;
     }
