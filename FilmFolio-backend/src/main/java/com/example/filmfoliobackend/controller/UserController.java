@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
@@ -29,14 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<UserDto> getUserInfo(@RequestParam String username) {
-        UserDto userInfo = userService.getUserInfo(username);
+    public ResponseEntity<UserDto> getUserInfo(@RequestParam String idUser) {
+        UserDto userInfo = userService.getUserInfo(idUser);
         return ResponseEntity.ok(userInfo);
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<UserDto> updateUserInfo(@RequestParam String username, @RequestBody UserDto updatedUserDto) {
-        UserDto updatedUserInfo = userService.updateUserInfo(username, updatedUserDto);
+    public ResponseEntity<UserDto> updateUserInfo(@RequestParam String idUser, @RequestBody UserDto updatedUserDto) {
+        UserDto updatedUserInfo = userService.updateUserInfo(idUser, updatedUserDto);
         return ResponseEntity.ok(updatedUserInfo);
     }
 }

@@ -4,6 +4,8 @@ import com.example.filmfoliobackend.dto.UserDto;
 import com.example.filmfoliobackend.exception.DuplicateResourceException;
 import com.example.filmfoliobackend.exception.InvalidRequestException;
 import com.example.filmfoliobackend.exception.UserNotFoundException;
+import com.example.filmfoliobackend.jwt.JwtTokenProvider;
+import com.example.filmfoliobackend.mapper.UserMapper;
 import com.example.filmfoliobackend.model.User;
 import com.example.filmfoliobackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +16,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    public UserDto getUserInfo(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public UserDto getUserInfo(String idUser) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         UserDto userDto = new UserDto();
         userDto.setUsername(user.getActualUsername());
@@ -25,15 +29,15 @@ public class UserService {
         return userDto;
     }
 
-    public UserDto updateUserInfo(String username, UserDto updatedUserDto) {            //TODO po stronie Fronta trzeba będzie dać domyślne wartości (te które są zapisane obecnie) aby nie ustawiać pól na null dla pól dla, których nie podano wartości
-        User existingUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
+    public UserDto updateUserInfo(String idUser, UserDto updatedUserDto) {            //TODO po stronie Fronta trzeba będzie dać domyślne wartości (te które są zapisane obecnie) aby nie ustawiać pól na null dla pól dla, których nie podano wartości
+        User existingUser = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         if (!existingUser.getEmail().equals(updatedUserDto.getEmail()) && userRepository.existsByEmail(updatedUserDto.getEmail())) {
             throw new DuplicateResourceException("Email is already taken");
         }
 
-        if (!existingUser.getUsername().equals(updatedUserDto.getUsername()) && userRepository.existsByUsername(updatedUserDto.getUsername())) {
+        if (!existingUser.getActualUsername().equals(updatedUserDto.getUsername()) && userRepository.existsByUsername(updatedUserDto.getUsername())) {
             throw new DuplicateResourceException("Username is already taken");
         }
 
@@ -42,7 +46,12 @@ public class UserService {
 
         User updatedUser = userRepository.save(existingUser);
 
-        return getUserInfo(updatedUser.getActualUsername());
+        String newToken = jwtTokenProvider.generateToken(updatedUser);
+        
+        UserDto responseDto = UserMapper.toDto(updatedUser);
+        responseDto.setToken(newToken);
+
+        return responseDto;
     }
 
 

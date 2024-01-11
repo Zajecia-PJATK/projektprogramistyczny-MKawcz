@@ -1,5 +1,6 @@
 package com.example.filmfoliobackend.jwt;
 
+import com.example.filmfoliobackend.model.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -29,17 +30,20 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User user) {
+            claims.put("userId", user.getIdUser());
+        }
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        return Jwts
-                .builder()
+        return Jwts.builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getUsername()) // Tutaj dalej będzie email jako username
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

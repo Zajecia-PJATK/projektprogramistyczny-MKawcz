@@ -6,7 +6,7 @@ import com.example.filmfoliobackend.model.User;
 public class UserMapper {
     public static UserDto toDto(User user) {
         UserDto userDto = new UserDto();
-        userDto.setUsername(user.getUsername());
+        userDto.setUsername(user.getActualUsername());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRoles().iterator().next());
         return userDto;
