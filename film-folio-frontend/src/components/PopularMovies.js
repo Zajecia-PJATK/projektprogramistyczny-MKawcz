@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 const PopularMovies = () => {
     const [movies, setMovies] = useState([]);
     const [error, setError] = useState('');
+    const baseURL = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
         const fetchMovies = async () => {
@@ -41,7 +42,12 @@ const PopularMovies = () => {
             <ul>
                 {movies.map(movie => (
                     <li key={movie.tmdbIdMovie}>
-                        <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                        <Link to={`/movies/${movie.id}`}>
+                            <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
+                        </Link>
+                        <Link to={`/movies/${movie.id}`}>
+                            <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
+                        </Link>
                     </li>
                 ))}
             </ul>

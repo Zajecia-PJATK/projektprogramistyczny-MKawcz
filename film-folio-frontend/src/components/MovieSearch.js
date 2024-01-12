@@ -5,6 +5,7 @@ const MovieSearch = () => {
     const [movies, setMovies] = useState([]);
     const [error, setError] = useState('');
     const [searchParams] = useSearchParams();
+    const baseURL = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
         const query = searchParams.get('query');
@@ -44,7 +45,12 @@ const MovieSearch = () => {
             <ul>
                 {movies.map(movie => (
                     <li key={movie.tmdbIdMovie}>
-                        <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+                        <Link to={`/movies/${movie.id}`}>
+                            <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
+                        </Link>
+                        <Link to={`/movies/${movie.id}`}>
+                            <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
+                        </Link>
                     </li>
                 ))}
             </ul>
