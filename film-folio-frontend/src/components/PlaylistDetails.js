@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link} from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 const PlaylistDetails = () => {
@@ -8,7 +8,6 @@ const PlaylistDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState('');
     const { playlistId } = useParams();
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPlaylistDetails = async () => {
@@ -54,7 +53,7 @@ const PlaylistDetails = () => {
             if (token) {
                 const decodedToken = jwtDecode(token);
                 const idUser = decodedToken.userId;
-                const response = await fetch(`http://localhost:8080/api/playlists/${playlistId}?idUser=${idUser}`, {
+                const updateResponse = await fetch(`http://localhost:8080/api/playlists/${playlistId}?idUser=${idUser}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -63,13 +62,24 @@ const PlaylistDetails = () => {
                     body: JSON.stringify(editablePlaylist)
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
                     throw new Error(errorData.message || 'Błąd aktualizacji playlisty');
                 }
 
-                const updatedPlaylist = await response.json();
-                setPlaylist(updatedPlaylist);
+                // Ponowne pobranie pełnych danych playlisty po aktualizacji
+                const fetchResponse = await fetch(`http://localhost:8080/api/playlists/${playlistId}?idUser=${idUser}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!fetchResponse.ok) {
+                    throw new Error('Błąd podczas pobierania aktualizowanych danych playlisty');
+                }
+
+                const updatedPlaylistData = await fetchResponse.json();
+                setPlaylist(updatedPlaylistData);
                 setIsEditing(false);
             }
         } catch (err) {
@@ -133,7 +143,7 @@ const PlaylistDetails = () => {
                     <h1>{playlist.name}</h1>
                     <p>{playlist.description}</p>
                     <button onClick={handleEditClick}>Edytuj</button>
-                    {playlist.movies.map(movie => (
+                    {playlist && playlist.movies && playlist.movies.map(movie => (
                         <div key={movie.id}>
                             <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
                             <button onClick={() => handleDeleteMovie(movie.id)}>Usuń</button>

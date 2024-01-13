@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import UserPlaylists from './UserPlaylists';
+import { Link } from 'react-router-dom';
+import UserWatchlist from "./UserWatchlist";
+
 const UserProfile = () => {
     const [userInfo, setUserInfo] = useState({ username: '', email: '' });
     const [isEditing, setIsEditing] = useState(false);
@@ -106,8 +110,11 @@ const UserProfile = () => {
                     <p>Nazwa użytkownika: {userInfo.username}</p>
                     <p>Email: {userInfo.email}</p>
                     <button onClick={handleEditClick}>Edytuj profil</button>
+                    <Link to="/create-playlist">Stwórz nową playlistę</Link>
                 </>
             )}
+            <UserWatchlist />
+            <UserPlaylists />
         </div>
     );
 };

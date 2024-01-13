@@ -44,7 +44,7 @@ const MovieSearch = () => {
             <h1>Wyniki wyszukiwania</h1>
             <ul>
                 {movies.map(movie => (
-                    <li key={movie.tmdbIdMovie}>
+                    <li key={movie.id}>
                         <Link to={`/movies/${movie.id}`}>
                             <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
                         </Link>

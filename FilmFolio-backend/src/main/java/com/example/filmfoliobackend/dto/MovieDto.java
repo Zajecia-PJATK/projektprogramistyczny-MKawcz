@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class MovieDto {
+    private String idMovie;
     @JsonProperty("id")
     private Long tmdbIdMovie;
     private String title;

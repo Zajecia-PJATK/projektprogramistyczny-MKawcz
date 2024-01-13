@@ -6,6 +6,7 @@ import com.example.filmfoliobackend.model.Movie;
 public class MovieMapper {
     public static MovieDto toDto(Movie movie) {
         MovieDto dto = new MovieDto();
+        dto.setIdMovie(movie.getIdMovie());
         dto.setTmdbIdMovie(movie.getTmdbIdMovie());
         dto.setTitle(movie.getTitle());
         dto.setOverview(movie.getOverview());
@@ -26,7 +27,7 @@ public class MovieMapper {
         movie.setTitle(dto.getTitle());
         movie.setOverview(dto.getOverview());
         movie.setPosterPath(dto.getPosterPath());
-        movie.setPosterPath(dto.getBackdropPath());
+        movie.setBackdropPath(dto.getBackdropPath());
         movie.setVoteAverage(dto.getVoteAverage());
         movie.setVoteCount(dto.getVoteCount());
         movie.setReleaseDate(dto.getReleaseDate());

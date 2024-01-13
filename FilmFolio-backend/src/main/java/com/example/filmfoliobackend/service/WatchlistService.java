@@ -21,19 +21,18 @@ public class WatchlistService {
 
     private final MovieRepository movieRepository;
 
-    public List<MovieDto> getUserWatchlist(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
-
+    public List<MovieDto> getUserWatchlist(String idUser) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         List<MovieDto> watchlistDto = user.getWatchlist().stream().map(MovieMapper::toDto).toList();
 
         return watchlistDto;
     }
 
-    public List<MovieDto> addMovieToWatchlist(String username, MovieDto movieDto) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
+    public List<MovieDto> addMovieToWatchlist(String idUser, MovieDto movieDto) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         Movie movie = movieRepository.findByTmdbIdMovie(movieDto.getTmdbIdMovie())
                 .orElseGet(() -> MovieMapper.toDocument(movieDto));
@@ -42,7 +41,7 @@ public class WatchlistService {
                 .anyMatch(m -> m.getTmdbIdMovie().equals(movie.getTmdbIdMovie()));
 
         if(isMoviePresentInUserWatchlist) {
-            throw new ResourceOwnershipException("Movie with TMDB id " + movie.getTmdbIdMovie() + " is already in the watchlist of user " + username);
+            throw new ResourceOwnershipException("Movie with TMDB id " + movie.getTmdbIdMovie() + " is already in the watchlist of user " + user.getActualUsername());
         }
 
         movie.getUsers().add(user);
@@ -51,12 +50,12 @@ public class WatchlistService {
         user.getWatchlist().add(movie);
         userRepository.save(user);
 
-        return getUserWatchlist(username);
+        return getUserWatchlist(idUser);
     }
 
-    public List<MovieDto> deleteMovieFromWatchlist(String username, Long tmdbIdMovie) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("No user found with username: " + username));
+    public List<MovieDto> deleteMovieFromWatchlist(String idUser, Long tmdbIdMovie) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdMovie)
                 .orElseThrow(() -> new MovieNotFoundException("No movie found with TMDB id: " + tmdbIdMovie));
@@ -69,7 +68,7 @@ public class WatchlistService {
                 .anyMatch(m -> m.getTmdbIdMovie().equals(tmdbIdMovie));
 
         if(!isMoviePresentInUserWatchlist) {
-            throw new ResourceOwnershipException("Movie with TMDB id " + movie.getTmdbIdMovie() + " is not the watchlist of the user " + username);
+            throw new ResourceOwnershipException("Movie with TMDB id " + movie.getTmdbIdMovie() + " is not the watchlist of the user " + user.getActualUsername());
         }
 
         user.getWatchlist().remove(movie);
@@ -78,7 +77,7 @@ public class WatchlistService {
         userRepository.save(user);
         movieRepository.save(movie);
 
-        return getUserWatchlist(username);
+        return getUserWatchlist(idUser);
     }
 
 }

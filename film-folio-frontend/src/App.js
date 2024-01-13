@@ -6,6 +6,9 @@ import PopularMovies from "./components/PopularMovies";
 import MovieDetails from "./components/MovieDetails";
 import MovieSearch from "./components/MovieSearch";
 import NavigationBar from "./components/NavigationBar";
+import CreatePlaylist from "./components/CreatePlaylist";
+import PlaylistDetails from "./components/PlaylistDetails";
+import UserWatchlist from "./components/UserWatchlist";
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
               <Route path="/movies/popular" element={<PopularMovies />} />
               <Route path="/movies/:movieId" element={<MovieDetails />} />
               <Route path="/search" element={<MovieSearch />} />
+              <Route path="/create-playlist" element={<CreatePlaylist />} />
+              <Route path="/playlists/:playlistId" element={<PlaylistDetails />} />
+              <Route path="/watchlist" element={<UserWatchlist />} />
           </Routes>
       </Router>
   );

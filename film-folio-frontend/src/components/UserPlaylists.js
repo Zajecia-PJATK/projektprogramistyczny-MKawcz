@@ -28,8 +28,8 @@ const UserPlaylists = () => {
             } catch (err) {
                 setError(err.message);
             }
-            fetchPlaylists();
         };
+        fetchPlaylists();
     }, []);
 
     const handleDelete = async (playlistId) => {

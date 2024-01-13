@@ -48,21 +48,75 @@ const MovieDetails = () => {
     const handleAddToPlaylist = async () => {
         try {
             const token = localStorage.getItem('token');
-            if (token && selectedPlaylist) {
-                const response = await fetch(`http://localhost:8080/api/playlists/${selectedPlaylist}`, {
+            if (token && selectedPlaylist && movie) {
+                const decodedToken = jwtDecode(token);
+                const idUser = decodedToken.userId;
+                const movieData = {
+                    id: movie.id,
+                    title: movie.title,
+                    overview: movie.overview,
+                    poster_path: movie.poster_path,
+                    backdrop_path: movie.backdrop_path,
+                    vote_average: movie.vote_average,
+                    vote_count: movie.vote_count,
+                    release_date: movie.release_date,
+                    runtime: movie.runtime,
+                    adult: movie.adult
+                };
+                const response = await fetch(`http://localhost:8080/api/playlists/${selectedPlaylist}?idUser=${idUser}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ tmdbIdMovie: movieId })
+                    body: JSON.stringify(movieData)
                 });
 
                 if (!response.ok) {
-                    throw new Error('Nie udało się dodać filmu do playlisty');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Nie udało się dodać filmu do playlisty');
                 }
 
                 alert('Film został dodany do playlisty');
+            }
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    const handleAddToWatchlist = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token && movie) {
+                const decodedToken = jwtDecode(token);
+                const idUser = decodedToken.userId;
+                const movieData = {
+                    id: movie.id,
+                    title: movie.title,
+                    overview: movie.overview,
+                    poster_path: movie.poster_path,
+                    backdrop_path: movie.backdrop_path,
+                    vote_average: movie.vote_average,
+                    vote_count: movie.vote_count,
+                    release_date: movie.release_date,
+                    runtime: movie.runtime,
+                    adult: movie.adult
+                };
+                const response = await fetch(`http://localhost:8080/api/watchlist?idUser=${idUser}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(movieData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Nie udało się dodać filmu do watchlisty');
+                }
+
+                alert('Film został dodany do Twojej watchlisty');
             }
         } catch (err) {
             setError(err.message);
@@ -95,6 +149,7 @@ const MovieDetails = () => {
                 ))}
             </select>
             <button onClick={handleAddToPlaylist}>Dodaj do playlisty</button>
+            <button onClick={handleAddToWatchlist}>Dodaj do Watchlisty</button>
         </div>
     );
 };

@@ -6,6 +6,7 @@ import com.example.filmfoliobackend.model.Playlist;
 public class PlaylistMapper {
     public static PlaylistDto toDto(Playlist playlist) {
         PlaylistDto playlistDto = new PlaylistDto();
+        playlistDto.setIdPlaylist(playlist.getIdPlaylist());
         playlistDto.setName(playlist.getName());
         playlistDto.setDescription(playlist.getDescription());
 

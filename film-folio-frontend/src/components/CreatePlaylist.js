@@ -24,7 +24,8 @@ const CreatePlaylist = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Nie udało się stworzyć playlisty');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Nie udało się utworzyć playlisty');
                 }
 
                 navigate('/profile'); // Przekieruj do profilu lub listy playlist
