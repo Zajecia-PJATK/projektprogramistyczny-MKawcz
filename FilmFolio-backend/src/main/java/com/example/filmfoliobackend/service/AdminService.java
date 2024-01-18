@@ -34,9 +34,9 @@ public class AdminService {
         return allUsersDto;
     }
 
-    public UserDto changeUserPrivileges(String userId, Role newRole) {
-        User user = userRepository.findByIdUser(userId)
-                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + userId));
+    public UserDto changeUserPrivileges(String idUser, Role newRole) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         user.setRoles(Collections.singleton(newRole));
         userRepository.save(user);
@@ -45,30 +45,27 @@ public class AdminService {
     }
 
     public MovieDto createMovie(MovieDto movieDto) {
-        if(movieRepository.existsByTmdbIdMovie(movieDto.getTmdbIdMovie())) {
-            throw new DuplicateResourceException("Movie with the TMDB id already exists");
-        }
-
         Movie movie = MovieMapper.toDocument(movieDto);
+        movie.setIsCustom(true);
 
         movieRepository.save(movie);
 
         return MovieMapper.toDto(movie);        //TODO sprawdź czy będzie działało bez podania tmdb id
     }
 
-    public MovieDto updateMovieInfo(String movieId, MovieDto movieDto) {            //TODO na Froncie zablokuj zmianę Tmdb id
+    public MovieDto updateMovieInfo(String movieId, MovieDto updatedMovieDto) {            //TODO na Froncie zablokuj zmianę Tmdb id
         Movie movie = movieRepository.findByIdMovie(movieId)
                 .orElseThrow(() -> new MovieNotFoundException("No movie found with the id: " + movieId));
 
-        movie.setTitle(movieDto.getTitle());
-        movie.setOverview(movieDto.getOverview());
-        movie.setPosterPath(movieDto.getPosterPath());
-        movie.setBackdropPath(movieDto.getBackdropPath());
-        movie.setVoteAverage(movieDto.getVoteAverage());
-        movie.setVoteCount(movie.getVoteCount());
-        movie.setReleaseDate(movieDto.getPosterPath());
-        movie.setRuntime(movie.getRuntime());
-        movie.setAdult(movie.getAdult());
+        movie.setTitle(updatedMovieDto.getTitle());
+        movie.setOverview(updatedMovieDto.getOverview());
+//        movie.setPosterPath(updatedMovieDto.getPosterPath());
+//        movie.setBackdropPath(updatedMovieDto.getBackdropPath());
+//        movie.setVoteAverage(updatedMovieDto.getVoteAverage());
+//        movie.setVoteCount(updatedMovieDto.getVoteCount());
+        movie.setReleaseDate(updatedMovieDto.getPosterPath());
+        movie.setRuntime(updatedMovieDto.getRuntime());
+        movie.setAdult(updatedMovieDto.getAdult());
 
         movieRepository.save(movie);
 

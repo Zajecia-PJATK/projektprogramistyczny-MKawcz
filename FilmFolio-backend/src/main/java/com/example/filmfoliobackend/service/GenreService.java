@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GenreService {
     private final RestTemplate restTemplate;
-//    private final GenreRepository genreRepository;
     @Value("${tmdb.api.key}")
     private String apiKey;
     @Value("${tmdb.api.url}")

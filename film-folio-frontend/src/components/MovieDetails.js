@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import MovieReviews from './MovieReviews';
 
 const MovieDetails = () => {
     const [movie, setMovie] = useState(null);
@@ -26,6 +27,7 @@ const MovieDetails = () => {
 
                     const decodedToken = jwtDecode(token);
                     const idUser = decodedToken.userId;
+
                     const playlistsResponse = await fetch(`http://localhost:8080/api/playlists?idUser=${idUser}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -150,6 +152,9 @@ const MovieDetails = () => {
             </select>
             <button onClick={handleAddToPlaylist}>Dodaj do playlisty</button>
             <button onClick={handleAddToWatchlist}>Dodaj do Watchlisty</button>
+
+            <MovieReviews movieId={movieId} />
+
         </div>
     );
 };

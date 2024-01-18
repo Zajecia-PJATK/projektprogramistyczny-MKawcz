@@ -5,6 +5,7 @@ const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate(); // Hook do zarządzania nawigacją
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,9 +24,13 @@ const LoginForm = () => {
             console.log(data);
             localStorage.setItem('token', data.token); // Zapisanie tokena
             navigate('/profile');
-        } catch (error) {
-            console.error("Błąd logowania: ", error);
+        } catch (err) {
+            setError(err.message);
         }
+    }
+
+    if (error) {
+        return <div>Błąd: {error}</div>;
     }
 
     return (

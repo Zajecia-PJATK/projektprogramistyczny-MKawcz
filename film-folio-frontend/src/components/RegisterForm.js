@@ -6,7 +6,7 @@ const RegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isRegistered, setIsRegistered] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,14 +26,18 @@ const RegisterForm = () => {
             // const data = await response.json();
             // console.log(data);
             // Przekierowanie lub zapisanie tokena JWT
-        } catch (error) {
-            setErrorMessage(error.toString());
+        } catch (err) {
+            setError(err.message);
         }
     };
 
     const handleGoToLogin = () => {
         navigate('/login');
     };
+
+    if (error) {
+        return <div>Błąd: {error}</div>;
+    }
 
     return (
         <div>
@@ -67,7 +71,6 @@ const RegisterForm = () => {
                 </div>
             </form>
             {isRegistered && <p>Rejestracja zakończona sukcesem!</p>}
-            {errorMessage && <p>{errorMessage}</p>}
             <button onClick={handleGoToLogin}>Przejdź do logowania</button>
         </div>
     );

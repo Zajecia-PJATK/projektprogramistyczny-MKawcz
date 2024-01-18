@@ -8,7 +8,9 @@ import MovieSearch from "./components/MovieSearch";
 import NavigationBar from "./components/NavigationBar";
 import CreatePlaylist from "./components/CreatePlaylist";
 import PlaylistDetails from "./components/PlaylistDetails";
-import UserWatchlist from "./components/UserWatchlist";
+import UserList from "./components/UserList";
+import CustomMovies from "./components/CustomMovies";
+import CustomMovieDetails from "./components/CustomMovieDetails";
 
 function App() {
   return (
@@ -23,7 +25,10 @@ function App() {
               <Route path="/search" element={<MovieSearch />} />
               <Route path="/create-playlist" element={<CreatePlaylist />} />
               <Route path="/playlists/:playlistId" element={<PlaylistDetails />} />
-              <Route path="/watchlist" element={<UserWatchlist />} />
+              <Route path="/admin/users" element={<UserList />} />
+              <Route path="/movies/custom" element={<CustomMovies />} />
+              <Route path="/movies/custom/:movieId" element={<CustomMovieDetails />} />
+              {/*<Route path="/watchlist" element={<UserWatchlist />} />*/}
           </Routes>
       </Router>
   );

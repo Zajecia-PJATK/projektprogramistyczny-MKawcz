@@ -22,9 +22,15 @@ public class MovieController {
         return ResponseEntity.ok(popularMovies);
     }
 
-    @GetMapping("/{movieId}")
-    public ResponseEntity<MovieDto> getMovie(@PathVariable Long movieId) {
-        MovieDto movieDto = movieService.getMovie(movieId);
+    @GetMapping("/{idMovie}")
+    public ResponseEntity<MovieDto> getMovie(@PathVariable Long idMovie) {
+        MovieDto movieDto = movieService.getMovie(idMovie);
+        return ResponseEntity.ok(movieDto);
+    }
+
+    @GetMapping("/custom/{idMovie}")
+    public ResponseEntity<MovieDto> getMovieByIdMovie(@PathVariable String idMovie) {
+        MovieDto movieDto = movieService.getMovieByIdMovie(idMovie);
         return ResponseEntity.ok(movieDto);
     }
 
@@ -34,5 +40,10 @@ public class MovieController {
         return ResponseEntity.ok(searchResults);
     }
 
+    @GetMapping("/custom")
+    public ResponseEntity<List<MovieDto>> getCustomMovies() {
+        List<MovieDto> customMovies = movieService.getCustomMovies();
+        return ResponseEntity.ok(customMovies);
+    }
 }
 

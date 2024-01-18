@@ -2,10 +2,10 @@ package com.example.filmfoliobackend.dto;
 
 import com.example.filmfoliobackend.model.enums.Role;
 import lombok.Data;
-import org.apache.el.parser.Token;
 
 @Data
 public class UserDto {
+    private String idUser;
     private String username;
     private String email;
     private String password;

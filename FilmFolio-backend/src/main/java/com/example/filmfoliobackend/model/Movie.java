@@ -20,13 +20,14 @@ public class Movie {
     private String overview;
     private String posterPath;
     private String backdropPath;
-    private Double voteAverage;     //możliwe że trzeba będzie pobierać z api a nie zapisywać w bazie
+    private Double voteAverage;     //TODO pobierać z api a nie zapisywać w bazie
     private Integer voteCount;
 //    private Double appVoteAverage; // Średnia ocen z filmFolio
 //    private Integer appVoteCount; // Liczba ocen z filmFolio
     private String releaseDate;
     private Integer runtime;
     private Boolean adult;
+    private Boolean isCustom;
     @DBRef
     private List<Genre> genres = new ArrayList<>();
     @DBRef

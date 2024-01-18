@@ -18,7 +18,7 @@ const PopularMovies = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać danych profilu');
+                        throw new Error('Nie udało się pobrać filmów');
                     }
 
                     const data = await response.json();

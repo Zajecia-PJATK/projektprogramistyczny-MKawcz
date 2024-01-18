@@ -11,12 +11,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/movies")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/{movieId}/reviews")
-    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String username, @PathVariable Long movieId, @RequestBody ReviewDto reviewDto) {
-        List<ReviewDto> reviews = reviewService.createReview(username, movieId, reviewDto);
+    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String idUser, @PathVariable Long movieId, @RequestBody ReviewDto reviewDto) {
+        List<ReviewDto> reviews = reviewService.createReview(idUser, movieId, reviewDto);
         return ResponseEntity.ok(reviews);
     }
 
@@ -27,8 +28,8 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{movieId}/reviews/{reviewId}")
-    public ResponseEntity<List<ReviewDto>> deleteReview(@RequestParam String username, @PathVariable Long movieId, @PathVariable String reviewId) {
-        List<ReviewDto> reviews = reviewService.deleteReview(username, movieId, reviewId);
+    public ResponseEntity<List<ReviewDto>> deleteReview(@RequestParam String idUser, @PathVariable Long movieId, @PathVariable String reviewId) {
+        List<ReviewDto> reviews = reviewService.deleteReview(idUser, movieId, reviewId);
         return ResponseEntity.ok(reviews);
     }
 

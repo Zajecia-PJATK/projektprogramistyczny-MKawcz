@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
     private final AdminService adminService;
 
@@ -22,9 +23,9 @@ public class AdminController {
         return ResponseEntity.ok(allUsers);
     }
 
-    @PutMapping("/users/{userId}")
-    public ResponseEntity<UserDto> changeUserPrivileges(@PathVariable String userId, @RequestParam Role newRole) {
-        UserDto userDto = adminService.changeUserPrivileges(userId, newRole);
+    @PutMapping("/users/{idUser}")
+    public ResponseEntity<UserDto> changeUserPrivileges(@PathVariable String idUser, @RequestParam Role newRole) {
+        UserDto userDto = adminService.changeUserPrivileges(idUser, newRole);
         return ResponseEntity.ok(userDto);
     }
 
@@ -34,15 +35,15 @@ public class AdminController {
         return ResponseEntity.ok(newMovie);
     }
 
-    @PutMapping("/movies/{movieId}")
-    public ResponseEntity<MovieDto> updateMovieInfo(@PathVariable String movieId, @RequestBody MovieDto movieDto) {
-        MovieDto updatedMovie = adminService.updateMovieInfo(movieId, movieDto);
+    @PutMapping("/movies/{idMovie}")
+    public ResponseEntity<MovieDto> updateMovieInfo(@PathVariable String idMovie, @RequestBody MovieDto movieDto) {
+        MovieDto updatedMovie = adminService.updateMovieInfo(idMovie, movieDto);
         return ResponseEntity.ok(updatedMovie);
     }
 
-    @DeleteMapping("/movies/{movieId}")
-    public ResponseEntity<String> deleteMovie(@PathVariable String movieId) {
-        adminService.deleteMovie(movieId);
-        return ResponseEntity.ok("Movie of id: " + movieId + " has been deleted");
+    @DeleteMapping("/movies/{idMovie}")
+    public ResponseEntity<String> deleteMovie(@PathVariable String idMovie) {
+        adminService.deleteMovie(idMovie);
+        return ResponseEntity.ok("Movie of id: " + idMovie + " has been deleted");
     }
 }

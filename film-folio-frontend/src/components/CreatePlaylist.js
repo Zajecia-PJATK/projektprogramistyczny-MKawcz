@@ -6,12 +6,16 @@ const CreatePlaylist = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const navigate = useNavigate();
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            if (token) {
+            if (!token) {
+                setError("Brak dostępu.");
+                return;
+            }
                 const decodedToken = jwtDecode(token);
                 const idUser = decodedToken.userId;
                 const response = await fetch(`http://localhost:8080/api/playlists?idUser=${idUser}`, {
@@ -29,11 +33,15 @@ const CreatePlaylist = () => {
                 }
 
                 navigate('/profile'); // Przekieruj do profilu lub listy playlist
-            }
+
         } catch (err) {
-            console.error(err.message);
+            setError(err.message);
         }
     };
+
+    if (error) {
+        return <div>Błąd: {error}</div>;
+    }
 
     return (
         <div>
