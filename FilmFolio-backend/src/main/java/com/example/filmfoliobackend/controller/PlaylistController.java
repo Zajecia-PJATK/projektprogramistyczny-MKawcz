@@ -4,6 +4,7 @@ package com.example.filmfoliobackend.controller;
 import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.PlaylistDto;
 import com.example.filmfoliobackend.service.PlaylistService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public ResponseEntity<PlaylistDto> createPlaylist(@RequestParam String idUser, @RequestBody PlaylistDto playlistDto) {
+    public ResponseEntity<PlaylistDto> createPlaylist(@RequestParam String idUser, @RequestBody @Valid PlaylistDto playlistDto) {
         PlaylistDto playlist = playlistService.createPlaylist(idUser, playlistDto);
         return ResponseEntity.ok(playlist);
     }
@@ -36,7 +37,7 @@ public class PlaylistController {
     }
 
     @PutMapping("/{playlistId}")
-    public ResponseEntity<PlaylistDto> updatePlaylist(@RequestParam String idUser, @PathVariable String playlistId , @RequestBody PlaylistDto playlistDto) {
+    public ResponseEntity<PlaylistDto> updatePlaylist(@RequestParam String idUser, @PathVariable String playlistId , @RequestBody @Valid PlaylistDto playlistDto) {
         PlaylistDto updatedPlaylistDto = playlistService.updatePlaylist(idUser, playlistId, playlistDto);
         return ResponseEntity.ok(updatedPlaylistDto);
     }
@@ -48,7 +49,7 @@ public class PlaylistController {
     }
 
     @PostMapping("/{playlistId}")
-    public ResponseEntity<MovieDto> addMovieToPlaylist(@RequestParam String idUser, @PathVariable String playlistId, @RequestBody MovieDto movieDto) {
+    public ResponseEntity<MovieDto> addMovieToPlaylist(@RequestParam String idUser, @PathVariable String playlistId, @RequestBody @Valid MovieDto movieDto) {
         MovieDto addedMovie = playlistService.addMovieToPlaylist(idUser, playlistId, movieDto);
         return ResponseEntity.ok(addedMovie);
     }

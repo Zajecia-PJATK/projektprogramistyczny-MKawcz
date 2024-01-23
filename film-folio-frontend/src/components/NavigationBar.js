@@ -5,6 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 const NavigationBar = () => {
     const[searchTerm, setSearchTerm] = useState('');
     const[includeAdult, setIncludeAdult] = useState(false);
+    const[primaryReleaseDate, setPrimaryReleaseDate] = useState('');
     const navigate = useNavigate();
 
     const location = useLocation();
@@ -21,9 +22,13 @@ const NavigationBar = () => {
         setIncludeAdult(!includeAdult);
     };
 
+    const handlePrimaryReleaseDateChange = (e) => {
+        setPrimaryReleaseDate(e.target.value);
+    };
+
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        navigate(`/search?query=${searchTerm}&includeAdult=${includeAdult}`);
+        navigate(`/search?query=${searchTerm}&includeAdult=${includeAdult}&primaryReleaseDate=${primaryReleaseDate}`);
     };
 
     return (
@@ -46,6 +51,7 @@ const NavigationBar = () => {
                         onChange={handleIncludeAdultChange}
                         className="mr-sm-2"
                     />
+                    <FormControl type="text" placeholder="Year" className="mr-sm-2" value={primaryReleaseDate} onChange={handlePrimaryReleaseDateChange} />
                     <Button variant="outline-success" type="submit">Search</Button>
                 </Form>
             </Navbar.Collapse>

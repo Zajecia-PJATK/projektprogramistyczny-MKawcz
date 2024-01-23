@@ -27,7 +27,7 @@ const MovieAddForm = ({ onMovieAdded }) => {
                 // backdropPath,
                 // voteAverage: Number(voteAverage),
                 // voteCount: Number(voteCount),
-                releaseDate,
+                release_date: releaseDate,
                 runtime: Number(runtime),
                 adult
             };
@@ -100,6 +100,7 @@ const MovieAddForm = ({ onMovieAdded }) => {
             <input
                 type="number"
                 value={runtime}
+                min="0"
                 onChange={(e) => setRuntime(e.target.value)}
                 placeholder="Czas trwania (minuty)"
             />

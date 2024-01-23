@@ -2,6 +2,7 @@ package com.example.filmfoliobackend.controller;
 
 import com.example.filmfoliobackend.dto.ReviewDto;
 import com.example.filmfoliobackend.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/{movieId}/reviews")
-    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String idUser, @PathVariable Long movieId, @RequestBody ReviewDto reviewDto) {
+    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String idUser, @PathVariable Long movieId, @RequestBody @Valid ReviewDto reviewDto) {
         List<ReviewDto> reviews = reviewService.createReview(idUser, movieId, reviewDto);
         return ResponseEntity.ok(reviews);
     }

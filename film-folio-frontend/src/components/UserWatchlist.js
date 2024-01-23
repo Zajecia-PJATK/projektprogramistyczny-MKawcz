@@ -51,6 +51,7 @@ const UserWatchlist = () => {
                 }
 
                 setWatchlist(watchlist.filter(movie => movie.id !== tmdbIdMovie));
+                window.location.reload();
             } catch (err) {
                 setError(err.message);
             }

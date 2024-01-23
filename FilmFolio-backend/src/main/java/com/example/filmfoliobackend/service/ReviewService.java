@@ -3,11 +3,13 @@ package com.example.filmfoliobackend.service;
 import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.ReviewDto;
 import com.example.filmfoliobackend.exception.*;
+import com.example.filmfoliobackend.mapper.GenreMapper;
 import com.example.filmfoliobackend.mapper.MovieMapper;
 import com.example.filmfoliobackend.mapper.ReviewMapper;
 import com.example.filmfoliobackend.model.Movie;
 import com.example.filmfoliobackend.model.Review;
 import com.example.filmfoliobackend.model.User;
+import com.example.filmfoliobackend.repository.GenreRepository;
 import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.repository.ReviewRepository;
 import com.example.filmfoliobackend.repository.UserRepository;
@@ -30,12 +32,8 @@ public class ReviewService {
 
         MovieDto movieDto = movieService.getMovie(tmdbIdmovie);
 
-        Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdmovie)
-                .orElseGet(() -> {
-                    // Jeśli nie, zapisz go najpierw
-                    Movie newMovie = MovieMapper.toDocument(movieDto);
-                    return movieRepository.save(newMovie);
-                });
+        Movie movie = movieService.saveMovieOrReturnExisting(movieDto);
+
 
         boolean reviewExists = reviewRepository.findByUserAndMovie(user, movie).isPresent();
         if (reviewExists) {
@@ -59,12 +57,7 @@ public class ReviewService {
     public List<ReviewDto> getReviews(Long tmdbIdmovie) {
         MovieDto movieDto = movieService.getMovie(tmdbIdmovie);
 
-        Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdmovie)
-                .orElseGet(() -> {
-                    // Jeśli nie, zapisz go najpierw
-                    Movie newMovie = MovieMapper.toDocument(movieDto);          //TODO zmienić tak jak było???
-                    return movieRepository.save(newMovie);
-                });
+        Movie movie = movieService.saveMovieOrReturnExisting(movieDto);
 
         List<ReviewDto> movieReviewsDto = movie.getReviews().stream().map(ReviewMapper::toDto).toList();
 

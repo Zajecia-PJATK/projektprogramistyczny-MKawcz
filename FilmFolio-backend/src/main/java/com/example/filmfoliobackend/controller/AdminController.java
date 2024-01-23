@@ -4,6 +4,7 @@ import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.UserDto;
 import com.example.filmfoliobackend.model.enums.Role;
 import com.example.filmfoliobackend.service.AdminService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,13 +31,13 @@ public class AdminController {
     }
 
     @PostMapping("/movies")
-    public ResponseEntity<MovieDto> createMovie(@RequestBody MovieDto movieDto) {
+    public ResponseEntity<MovieDto> createMovie(@RequestBody @Valid MovieDto movieDto) {
         MovieDto newMovie = adminService.createMovie(movieDto);
         return ResponseEntity.ok(newMovie);
     }
 
     @PutMapping("/movies/{idMovie}")
-    public ResponseEntity<MovieDto> updateMovieInfo(@PathVariable String idMovie, @RequestBody MovieDto movieDto) {
+    public ResponseEntity<MovieDto> updateMovieInfo(@PathVariable String idMovie, @RequestBody @Valid MovieDto movieDto) {
         MovieDto updatedMovie = adminService.updateMovieInfo(idMovie, movieDto);
         return ResponseEntity.ok(updatedMovie);
     }

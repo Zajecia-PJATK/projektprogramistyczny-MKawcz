@@ -10,6 +10,7 @@ import com.example.filmfoliobackend.model.enums.Role;
 import com.example.filmfoliobackend.repository.UserRepository;
 import com.example.filmfoliobackend.response.AuthenticationResponse;
 import com.example.filmfoliobackend.response.request.AuthenticationRequest;
+import com.example.filmfoliobackend.response.request.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,19 +28,19 @@ public class AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(UserDto userDto) {
-        if (userRepository.existsByUsername(userDto.getUsername())) {
+    public AuthenticationResponse register(RegisterRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username is already taken");
         }
 
-        if (userRepository.existsByEmail(userDto.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email is already taken");
         }
 
         var user = User.builder()
-                .username(userDto.getUsername())
-                .email(userDto.getEmail())
-                .password(passwordEncoder.encode(userDto.getPassword()))
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .roles(Set.of(Role.ROLE_USER))
                 .build();
         userRepository.save(user);

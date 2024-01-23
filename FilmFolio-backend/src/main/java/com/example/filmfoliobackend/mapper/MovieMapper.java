@@ -1,9 +1,19 @@
 package com.example.filmfoliobackend.mapper;
 
+import com.example.filmfoliobackend.dto.GenreDto;
 import com.example.filmfoliobackend.dto.MovieDto;
+import com.example.filmfoliobackend.model.Genre;
 import com.example.filmfoliobackend.model.Movie;
+import com.example.filmfoliobackend.service.GenreService;
+import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RequiredArgsConstructor
 public class MovieMapper {
+    private final GenreService genreService;
+
     public static MovieDto toDto(Movie movie) {
         MovieDto dto = new MovieDto();
         dto.setIdMovie(movie.getIdMovie());
@@ -17,6 +27,9 @@ public class MovieMapper {
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setRuntime(movie.getRuntime());
         dto.setAdult(movie.getAdult());
+        if(!movie.getGenres().isEmpty() && movie.getGenres() != null) {
+            dto.setGenres(movie.getGenres().stream().map(GenreMapper::toDto).toList());
+        }
 
         return dto;
     }

@@ -17,6 +17,6 @@ public class Genre {
     private String idGenre;
     private Long tmdbIdGenre;
     private String name;
-    @DBRef
-    private List<Movie> movies = new ArrayList<>();
+//    @DBRef
+//    private List<Movie> movies = new ArrayList<>();
 }

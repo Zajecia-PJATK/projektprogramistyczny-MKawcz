@@ -10,12 +10,13 @@ const MovieSearch = () => {
     useEffect(() => {
         const query = searchParams.get('query');
         const includeAdult = searchParams.get('includeAdult') === 'true';
+        const primaryReleaseDate = searchParams.get('primaryReleaseDate');
         if (query) {
             const fetchMovies = async () => {
                 try {
                     const token = localStorage.getItem('token');
                     if (token) {
-                        const response = await fetch(`http://localhost:8080/api/tmdb/movies/search?query=${query}&includeAdult=${includeAdult}`, {
+                        const response = await fetch(`http://localhost:8080/api/tmdb/movies/search?query=${query}&includeAdult=${includeAdult}&primaryReleaseDate=${primaryReleaseDate}`, {
                             headers: {
                                 'Authorization': `Bearer ${token}`
                             }

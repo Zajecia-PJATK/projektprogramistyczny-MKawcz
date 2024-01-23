@@ -11,6 +11,7 @@ import PlaylistDetails from "./components/PlaylistDetails";
 import UserList from "./components/UserList";
 import CustomMovies from "./components/CustomMovies";
 import CustomMovieDetails from "./components/CustomMovieDetails";
+import DiscoverMoviesForm from "./components/DiscoverMoviesForm";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/admin/users" element={<UserList />} />
               <Route path="/movies/custom" element={<CustomMovies />} />
               <Route path="/movies/custom/:movieId" element={<CustomMovieDetails />} />
+              <Route path="/movies/discover" element={<DiscoverMoviesForm />} />
               {/*<Route path="/watchlist" element={<UserWatchlist />} />*/}
           </Routes>
       </Router>

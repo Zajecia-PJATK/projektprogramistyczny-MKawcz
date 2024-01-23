@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.YearMonth;
 import java.util.*;
 
 @EqualsAndHashCode(of = "uuid")
@@ -27,12 +28,20 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private Set<Role> roles = new HashSet<>();
+    @Builder.Default
+    private Integer watchedMoviesCount = 0;
+    @Builder.Default
+    private Integer totalWatchTime = 0;
+    @Builder.Default
+    private Map<String, Integer> monthlyWatchStats = new HashMap<>();
     @DBRef
     private List<Movie> watchlist = new ArrayList<>();;
     @DBRef
     private List<Playlist> playlists = new ArrayList<>();
     @DBRef
     private List<Review> reviews = new ArrayList<>();
+    @DBRef
+    private List<Genre> preferences = new ArrayList<>();
 
     public String getActualUsername() {
         return username;

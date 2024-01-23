@@ -26,8 +26,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/api/tmdb/movies/**", "/api/tmdb/genres/**", "/api/users/**", "/api/watchlist/**", "/api/playlists/**", "/api/movies/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/tmdb/movies/**", "/api/users/register", "/api/users/login").permitAll()
+                        .requestMatchers("/api/tmdb/genres/**", "/api/users/**", "/api/watchlist/**", "/api/playlists/**", "/api/movies/**", "/api/recommendations/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

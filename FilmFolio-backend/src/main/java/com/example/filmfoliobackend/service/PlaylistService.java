@@ -8,6 +8,7 @@ import com.example.filmfoliobackend.mapper.PlaylistMapper;
 import com.example.filmfoliobackend.model.Movie;
 import com.example.filmfoliobackend.model.Playlist;
 import com.example.filmfoliobackend.model.User;
+import com.example.filmfoliobackend.repository.GenreRepository;
 import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.repository.PlaylistRepository;
 import com.example.filmfoliobackend.repository.UserRepository;
@@ -23,6 +24,7 @@ public class PlaylistService {
     private final PlaylistRepository playlistRepository;
     private final MovieRepository movieRepository;
     private final UserRepository userRepository;
+    private final MovieService movieService;
 
     public List<PlaylistDto> getPlaylists(String idUser) {
         User user = userRepository.findByIdUser(idUser)
@@ -123,8 +125,7 @@ public class PlaylistService {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
-        Movie movie = movieRepository.findByTmdbIdMovie(movieDto.getTmdbIdMovie())
-                .orElseGet(() -> MovieMapper.toDocument(movieDto));
+        Movie movie = movieService.saveMovieOrReturnExisting(movieDto);
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
                 .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));

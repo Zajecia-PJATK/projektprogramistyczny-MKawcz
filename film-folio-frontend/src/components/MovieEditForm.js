@@ -26,7 +26,7 @@ const MovieEditForm = ({ movie, onSave }) => {                      //TODO formu
                 // posterPath,
                 // backdropPath,
                 // voteAverage,
-                releaseDate,
+                release_date: releaseDate,
                 runtime,
                 adult
             };
@@ -97,6 +97,7 @@ const MovieEditForm = ({ movie, onSave }) => {                      //TODO formu
             <input
                 type="number"
                 value={runtime}
+                min="0"
                 onChange={(e) => setRuntime(e.target.value)}
                 placeholder="Czas trwania (minuty)"
             />

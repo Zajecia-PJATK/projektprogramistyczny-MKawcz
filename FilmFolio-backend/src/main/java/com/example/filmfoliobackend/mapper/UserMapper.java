@@ -10,6 +10,9 @@ public class UserMapper {
         userDto.setUsername(user.getActualUsername());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRoles().iterator().next());
+        userDto.setWatchedMoviesCount(user.getWatchedMoviesCount());
+        userDto.setTotalWatchTime(user.getTotalWatchTime());
+        userDto.setMonthlyWatchStats(user.getMonthlyWatchStats());
         return userDto;
     }
 
