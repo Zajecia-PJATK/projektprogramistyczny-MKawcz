@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {Link} from "react-router-dom";
+import "../styles/components/_discover_movies_form.scss"
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const DiscoverMoviesForm = () => {
     const [genres, setGenres] = useState([]);
@@ -12,7 +15,9 @@ const DiscoverMoviesForm = () => {
     const [primaryReleaseYear, setPrimaryReleaseYear] = useState('');
     const [movies, setMovies] = useState([]);
     const [maxPages, setMaxPages] = useState(1);
+    const [isGenresMenuOpen, setIsGenresMenuOpen] = useState(false);
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
     const baseURL = "https://image.tmdb.org/t/p/w500";
 
     const languages = [
@@ -45,6 +50,7 @@ const DiscoverMoviesForm = () => {
 
     useEffect(() => {
         const fetchGenres = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -55,11 +61,13 @@ const DiscoverMoviesForm = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać gatunków');
+                        throw new Error('Failed to fetch genres');
                     }
 
                     const data = await response.json();
                     setGenres(data);
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -92,9 +100,13 @@ const DiscoverMoviesForm = () => {
         });
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const toggleGenresMenu = () => {
+        setIsGenresMenuOpen(!isGenresMenuOpen);
+    };
+
     const fetchMovies = async (currentPage) => {
         const pageValue = typeof currentPage === 'number' ? currentPage : 1;
+        setError('');
 
         const params = new URLSearchParams({
             language: languages.find(lang => lang.english_name === language)?.iso_639_1,
@@ -106,6 +118,7 @@ const DiscoverMoviesForm = () => {
             withGenres: selectedGenres.join(',')
         });
 
+        setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`http://localhost:8080/api/tmdb/movies/discover?${params.toString()}`, {
@@ -115,21 +128,30 @@ const DiscoverMoviesForm = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Nie udało się wyszukać filmów');
+                throw new Error('Failed to fetch movies');
             }
 
             const data = await response.json();
             setMovies(data.results); // Teraz dane filmów są w `data.movies`
             setMaxPages(data.total_pages); // Aktualizacja maksymalnej liczby stron
-            console.log(maxPages);
+            setError('');
+            setIsLoading(false);
         } catch (err) {
             setError(err.message);
         }
     };
 
+    const validatePrimaryReleaseYear = (value) => {
+        return /^\d{4}$/.test(value);
+    };
+
     // Funkcja obsługująca wyszukiwanie
     const handleSearch = async () => {
         setPage(1); // Resetuj numer strony na 1 przy nowym wyszukiwaniu
+        if (primaryReleaseYear && !validatePrimaryReleaseYear(primaryReleaseYear)) {
+            setError("Please enter a valid year (YYYY)");
+            return false;
+        }
         await fetchMovies(1); // Wykonaj zapytanie z nowymi kryteriami, zaczynając od strony 1
     };
     const handlePreviousPage = () => {
@@ -145,113 +167,120 @@ const DiscoverMoviesForm = () => {
     };
 
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
-    }
-
     return (
-        <div>
-            <form onSubmit={(e) => {
-                e.preventDefault();
-                handleSearch();
-            }}>
-                <div>
-                    <label htmlFor="sortBy">Sortuj według:</label>
-                    <select
-                        id="sortBy"
-                        value={sortBy}
-                        onChange={e => setSortBy(e.target.value)}
-                    >
-                        <option value="popularity.desc">Popularność: malejąco</option>
-                        <option value="popularity.asc">Popularność: rosnąco</option>
-                        <option value="revenue.asc">Dochód: rosnąco</option>
-                        <option value="revenue.desc">Dochód: malejąco</option>
-                        <option value="primary_release_date.asc">Data wydania: od najstarszych</option>
-                        <option value="primary_release_date.desc">Data wydania: od najnowszych</option>
-                        <option value="vote_average.asc">Ocena: rosnąco</option>
-                        <option value="vote_average.desc">Ocena: malejąco</option>
-                        <option value="vote_count.asc">Liczba głosów: rosnąco</option>
-                        <option value="vote_count.desc">Liczba głosów: malejąco</option>
-                    </select>
+        <div className="discover-movies-container">
+            <div className="discover-movies-form">
+                {error && <div className="error">{error}</div>}
+                <form onSubmit={(e) => e.preventDefault()}>
+                    <div className="form-layout">
+                        <div className="form-group">
+                            <label htmlFor="sortBy">Sort by:</label>
+                            <select id="sortBy" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                                <option value="popularity.desc">Popularity: descending</option>
+                                <option value="popularity.asc">Popularity: ascending</option>
+                                <option value="revenue.asc">Income: ascending</option>
+                                <option value="revenue.desc">Income: descending</option>
+                                <option value="primary_release_date.asc">Release date: oldest first</option>
+                                <option value="primary_release_date.desc">Release date: newest first</option>
+                                <option value="vote_average.asc">Rating: ascending</option>
+                                <option value="vote_average.desc">Rating: descending</option>
+                                <option value="vote_count.asc">Number of votes: ascending</option>
+                                <option value="vote_count.desc">Number of votes: descending</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="language">Language:</label>
+                            <select id="language" value={language} onChange={e => setLanguage(e.target.value)}>
+                                {languages.map(lang => (
+                                    <option key={lang.iso_639_1} value={lang.english_name}>{lang.english_name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="primaryReleaseYear">Release year:</label>
+                            <input type="number" min="1" id="primaryReleaseYear" value={primaryReleaseYear}
+                                   onChange={e => setPrimaryReleaseYear(e.target.value)}/>
+                        </div>
+
+                        <div className="form-group">
+                            <label>
+                                Include adult movies
+                                <input type="checkbox" checked={includeAdult}
+                                       onChange={() => setIncludeAdult(!includeAdult)}/>
+                            </label>
+                        </div>
+
+                        <div className="form-group">
+                            <label>
+                                Include videos
+                                <input type="checkbox" checked={includeVideo}
+                                       onChange={() => setIncludeVideo(!includeVideo)}/>
+                            </label>
+                        </div>
+
+                        <div className="form-group genre-select">
+                            <button type="button" onClick={toggleGenresMenu}>
+                                {isGenresMenuOpen ? 'Hide genres' : 'Select genres'}
+                            </button>
+                        </div>
+
+                        {isGenresMenuOpen && (
+                            <div className="genre-dropdown">
+                                {genres.map(genre => (
+                                    <div key={genre.id} className="genre-item">
+                                        <input
+                                            type="checkbox"
+                                            id={`genre-${genre.id}`}
+                                            name="genre"
+                                            value={genre.id}
+                                            checked={selectedGenres.includes(genre.id)}
+                                            onChange={() => handleGenreChange(genre.id)}
+                                        />
+                                        <label htmlFor={`genre-${genre.id}`}>{genre.name}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button className="button" type="submit" onClick={handleSearch}>Search for movies</button>
+                </form>
+            </div>
+            {isLoading && <div> <Loader /> </div>}
+            {movies.length !== 0 && !isLoading && (
+            <div className="discover-results-container">
+                <div className="page-title">
+                    <h1>Search Results</h1>
                 </div>
-                <fieldset>
-                    <legend>Wybierz gatunki:</legend>
-                    {genres.map(genre => (
-                        <div key={genre.id}>
-                            <input
-                                type="checkbox"
-                                id={`genre-${genre.id}`}
-                                name="genre"
-                                value={genre.id}
-                                checked={selectedGenres.includes(genre.id)}
-                                onChange={() => handleGenreChange(genre.id)}
-                            />
-                            <label htmlFor={`genre-${genre.id}`}>{genre.name}</label>
+                <div className="movies-container">
+                    {movies.map(movie => (
+                        <div key={movie.id} className="movie-item">
+                            <Link to={`/movies/${movie.id}`}>
+                                <img
+                                    src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                                    alt={`Poster of ${movie.title}`}
+                                />
+                            </Link>
+                            <Link to={`/movies/${movie.id}`}>
+                                <p>{movie.title} ({movie.release_date ? movie.release_date.slice(0, 4) : 'No date'})</p>
+                            </Link>
                         </div>
                     ))}
-                </fieldset>
-                <div>
-                    <label htmlFor="language">Język:</label>
-                    <select id="language" value={language} onChange={e => setLanguage(e.target.value)}>
-                        {languages.map(lang => (
-                            <option key={lang.iso_639_1} value={lang.english_name}>{lang.english_name}</option>
-                        ))}
-                    </select>
                 </div>
-                <div>
-                    <label htmlFor="primaryReleaseYear">Rok wydania:</label>
-                    <input
-                        type="number"
-                        id="primaryReleaseYear"
-                        value={primaryReleaseYear}
-                        onChange={e => setPrimaryReleaseYear(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={includeAdult}
-                            onChange={() => setIncludeAdult(!includeAdult)}
-                        />
-                        Uwzględnij filmy dla pełnoletnich
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={includeVideo}
-                            onChange={() => setIncludeVideo(!includeVideo)}
-                        />
-                        Zawiera video
-                    </label>
-                </div>
-                <button type="submit">Wyszukaj filmy</button>
-            </form>
-            <h2>Wyniki wyszukiwania:</h2>
-            {movies.map((movie) => (
-                <div>
-                    <div key={movie.id}>
-                        <Link to={`/movies/${movie.id}`}>
-                            <img width="150" height="200" src={`${baseURL}${movie.poster_path}`}
-                                 alt={`Plakat filmu ${movie.title}`}/>
-                        </Link>
-                        <Link to={`/movies/${movie.id}`}>
-                            <p>{movie.title} ({movie.release_date ? movie.release_date.slice(0, 4) : 'Brak daty'})</p>
-                        </Link>
-                    </div>
 
+                <div className="pagination-buttons">
+                    <button className="button" type="button" onClick={handlePreviousPage}
+                            disabled={page === 1}>&#x2190;
+                    </button>
+                    <button className="button" type="button" onClick={handleNextPage}
+                            disabled={page >= maxPages}>&#x2192;
+                    </button>
                 </div>
-            ))}
-            {movies.length !== 0 &&
-                <div>
-                    <button type="button" onClick={handlePreviousPage} disabled={page === 1}>Poprzednia strona</button>
-                    <button type="button" onClick={handleNextPage} disabled={page >= maxPages}>Następna strona</button>
-                </div>
-            }
+            </div>
+            )}
         </div>
     );
 };
 
-export default DiscoverMoviesForm;
+export default withAuth(DiscoverMoviesForm);

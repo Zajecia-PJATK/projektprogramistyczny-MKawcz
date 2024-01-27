@@ -1,0 +1,54 @@
+@import "../utils/variables";
+
+.create-playlist-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: $color-grey;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  padding: 20px;
+  margin-top: 10px;
+  box-sizing: border-box;
+
+  form {
+    max-width: 600px; // Maksymalna szerokość formularza
+    width: 100%; // Szerokość dopasowana do kontenera
+    background-color: lighten($color-grey, 5%);
+    padding: 40px; // Wewnętrzny odstęp formularza
+    border-radius: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+
+    div {
+      margin-bottom: 20px; // Margines dla każdego pola formularza
+
+      label {
+        display: block; // Etykieta wyświetlana jako blok
+        margin-bottom: 10px; // Margines pomiędzy etykietą a polem
+        font-weight: bold; // Pogrubiona etykieta
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%; // Szerokość dopasowana do kontenera
+        padding: 10px; // Wewnętrzny odstęp pola
+        box-sizing: border-box;
+      }
+
+      textarea {
+        height: 100px; // Wysokość pola tekstowego
+        resize: none; // Umożliwia zmianę rozmiaru tylko w pionie
+        border-radius: 5px; // Zaokrąglone rogi
+      }
+    }
+
+    .button {
+      display: block; // Przycisk wyświetlany jako blok
+      width: 100%; // Szerokość dopasowana do kontenera
+      transition: background-color 0.3s; // Animacja tła przycisku
+
+    }
+  }
+}

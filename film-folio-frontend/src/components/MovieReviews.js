@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import '../styles/components/_reviews.scss'
+import StarRating from "./StarRating";
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const MovieReviews = ({ movieId }) => {
     const [reviews, setReviews] = useState([]);
@@ -7,6 +11,18 @@ const MovieReviews = ({ movieId }) => {
     const [newReviewContent, setNewReviewContent] = useState('');
     const [newReviewRating, setNewReviewRating] = useState(0);
     const [error, setError] = useState('');
+
+    const handleRating = (rating) => {
+        setNewReviewRating(rating);
+    };
+
+    const validateContent = (content) => {
+        return content.length > 0 && content.length <= 3000;
+    };
+
+    const validateRating = (rating) => {
+        return rating >= 1 && rating <= 10;
+    };
 
     const fetchReviews = async () => {
         try {
@@ -19,12 +35,13 @@ const MovieReviews = ({ movieId }) => {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Nie udało się pobrać recenzji');
+                    throw new Error('Failed to fetch reviews');
                 }
 
                 const data = await response.json();
                 setReviews(data);
                 setReviewsLoaded(true);
+                setError('');
             }
         } catch (err) {
             setError(err.message);
@@ -32,6 +49,16 @@ const MovieReviews = ({ movieId }) => {
     };
 
     const handleAddReview = async () => {
+        if (!validateContent(newReviewContent)) {
+            setError('Review content cannot be blank and should be max 3000 characters long');
+            return;
+        }
+
+        if (!validateRating(newReviewRating)) {
+            setError('Rating must be between 1 and 10');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             if (token) {
@@ -55,7 +82,7 @@ const MovieReviews = ({ movieId }) => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Nie udało się dodać recenzji');
+                    throw new Error(errorData.message || 'Failed to fetch reviews');
                 }
 
                 const updatedReviews = await response.json();
@@ -63,12 +90,12 @@ const MovieReviews = ({ movieId }) => {
                 setReviews(updatedReviews);
                 setNewReviewContent('');
                 setNewReviewRating(0);
+                setError('');
             }
         } catch (err) {
             setError(err.message);
         }
     };
-
 
     const handleDeleteReview = async (reviewId) => {
         try {
@@ -91,54 +118,52 @@ const MovieReviews = ({ movieId }) => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Nie udało się usunąć recenzji');
+                    throw new Error(errorData.message || 'Failed to fetch reviews');
                 }
 
                 const updatedReviews = await response.json();
                 setReviews(updatedReviews);
+                setError('');
             }
         } catch (err) {
             setError(err.message);
         }
     };
 
+
                 //TODO ukryć przycisk usunięcia jeżeli recenzja nie należy do zalogowanego użytkownika
     return (
-        <div>
-            <h3>Recenzje</h3>
-            <div>
+        <div className="movie-reviews">
+            <h3>Reviews</h3>
+            <div className="add-review">
                 <textarea
                     value={newReviewContent}
                     onChange={(e) => setNewReviewContent(e.target.value)}
-                    placeholder="Dodaj swoją recenzję"
+                    placeholder="Add your review"
                 />
-                <input
-                    type="number"
-                    value={newReviewRating}
-                    onChange={(e) => setNewReviewRating(parseInt(e.target.value))}
-                    placeholder="Ocena"
-                    min="1"
-                    max="10"
-                />
-                <button onClick={handleAddReview}>Dodaj recenzję</button>
+                <StarRating rating={newReviewRating} setRating={handleRating} />
+                <div className="review-controls">
+                    <button className="button" onClick={handleAddReview}>Add Review</button>
+                    {!reviewsLoaded && <button className="button show-reviews" onClick={fetchReviews}>Show Reviews</button>}
+                </div>
             </div>
-                {error && <p>{error}</p>}
-                {!reviewsLoaded && <button onClick={fetchReviews}>Pokaż recenzje</button>}
-                {reviewsLoaded && reviews.length === 0 ? <p>Ten film nie ma jeszcze recenzji.</p> : (
-                    <ul>
-                        {reviews.map(review => (
-                            <li key={review.idReview}>
+            {error && <div className="error">{error}</div>}
+            {reviewsLoaded && reviews.length === 0 ? <p>This movie does not have any reviews yet</p> : (
+                <ul>
+                    {reviews.map(review => (
+                        <li key={review.idReview}>
+                            <div className="review-content">
                                 <p>{review.content}</p>
-                                <p>Ocena: {review.rating}</p>
-                                <p>Data dodania: {review.createdDate.slice(0, 10)}</p>
-                                <button onClick={() => handleDeleteReview(review.idReview)}>Usuń recenzję</button>          {/*TODO wyświetlanie usera, który stworzył recenzje*/}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
+                                <p className="rating">Rating: {review.rating}</p>
+                                <p className="date">Date of publication: {review.createdDate.slice(0, 10)}</p>
+                            </div>
+                            <button className="button" onClick={() => handleDeleteReview(review.idReview)}>Delete Review</button>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };
 
-export default MovieReviews;
+export default withAuth(MovieReviews);

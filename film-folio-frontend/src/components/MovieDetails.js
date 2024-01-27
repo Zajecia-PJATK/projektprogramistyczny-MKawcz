@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import React, {useState, useEffect, useRef} from 'react';
+import {useParams} from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
 import MovieReviews from './MovieReviews';
+import '../styles/components/_movie_details.scss'
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const MovieDetails = () => {
     const [movie, setMovie] = useState(null);
@@ -9,11 +12,14 @@ const MovieDetails = () => {
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState('');
     const [error, setError] = useState('');
-    const { movieId } = useParams();
+    const {movieId} = useParams();
     const baseURL = "https://image.tmdb.org/t/p/w500";
+    const castRef = useRef(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchMovieDetails = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -24,7 +30,7 @@ const MovieDetails = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać informacji o filmie');
+                        throw new Error('Failed to fetch movie details');
                     }
 
                     const data = await response.json();
@@ -43,6 +49,9 @@ const MovieDetails = () => {
                         const playlistsData = await playlistsResponse.json();
                         setPlaylists(playlistsData);
                     }
+
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -60,12 +69,12 @@ const MovieDetails = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać informacji o obsadzie');
+                        throw new Error('Failed to fetch movie cast');
                     }
 
                     const data = await response.json();
                     setCast(data);
-
+                    setError('');
                 }
             } catch (err) {
                 setError(err.message);
@@ -93,7 +102,7 @@ const MovieDetails = () => {
                     release_date: movie.release_date,
                     runtime: movie.runtime,
                     adult: movie.adult,
-                    genres: movie.genres.map(genre => ({ id: genre.id, name: genre.name }))
+                    genres: movie.genres.map(genre => ({id: genre.id, name: genre.name}))
                 };
                 const response = await fetch(`http://localhost:8080/api/playlists/${selectedPlaylist}?idUser=${idUser}`, {
                     method: 'POST',
@@ -106,10 +115,11 @@ const MovieDetails = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Nie udało się dodać filmu do playlisty');
+                    throw new Error(errorData.message || 'Failed to add movie to playlist');
                 }
 
-                alert('Film został dodany do playlisty');
+                setError('');
+                alert('Successfully added the movie to the playlist!');
             }
         } catch (err) {
             setError(err.message);
@@ -133,7 +143,7 @@ const MovieDetails = () => {
                     release_date: movie.release_date,
                     runtime: movie.runtime,
                     adult: movie.adult,
-                    genres: movie.genres.map(genre => ({ id: genre.id, name: genre.name }))
+                    genres: movie.genres.map(genre => ({id: genre.id, name: genre.name}))
                 };
                 const response = await fetch(`http://localhost:8080/api/watchlist?idUser=${idUser}`, {
                     method: 'POST',
@@ -146,66 +156,101 @@ const MovieDetails = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Nie udało się dodać filmu do watchlisty');
+                    throw new Error(errorData.message || 'Failed to add movie to watchlist');
                 }
 
-                alert('Film został dodany do Twojej watchlisty');
+                setError('');
+                alert('Successfully added the movie to the watchlist!');
             }
         } catch (err) {
             setError(err.message);
         }
     };
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
-    }
+    const scrollLeft = () => {
+        if (castRef.current) {
+            castRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+        }
+    };
 
-    if (!movie) {
-        return <div>Ładowanie...</div>;
+    const scrollRight = () => {
+        if (castRef.current) {
+            castRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+        }
+    };
+
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
-        <div>
-            <h1>{movie.title}</h1>
-            <img src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
-            <img src={`${baseURL}${movie.backdrop_path}`} alt={`Tło filmu ${movie.title}`}/>
-            <p>{movie.overview}</p>
-            <p>Średnia ocena: {movie.vote_average} (Liczba głosów: {movie.vote_count})</p>
-            <p>Data wydania: {movie.release_date}</p>
-            {movie.runtime && <p>Czas trwania: {movie.runtime} minut</p>}
-            <p>Dla dorosłych: {movie.adult ? 'Tak' : 'Nie'}</p>
-            <p>Gatunki:</p>
-            <ul>
-                {movie.genres.map(genre => (
-                   <li key={genre.id}>
-                       <p>{genre.name}</p>
-                   </li>
-                ))}
-            </ul>
-            <p>Obsada:</p>
-            <ul>
-                {cast.map(actor => (
-                    <li key={actor.id}>
-                        <img width="150" height="200" src={`${baseURL}${actor.profile_path}`}
-                             alt={`Zdjęcie profilowe ${actor.name}`}/>
-                        <p>{actor.name} jako {actor.character}</p>
-                    </li>
-                ))}
-            </ul>
+        <div className="movie-details">
 
-            <select value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)}>
-                <option value="">Wybierz playlistę</option>
-                {playlists.map(playlist => (
-                    <option key={playlist.idPlaylist} value={playlist.idPlaylist}>{playlist.name}</option>
-                ))}
-            </select>
-            <button onClick={handleAddToPlaylist}>Dodaj do playlisty</button>
-            <button onClick={handleAddToWatchlist}>Dodaj do Watchlisty</button>
-
-            <MovieReviews movieId={movieId} />
-
+            <div className="movie-content" style={{backgroundImage: `url(${baseURL}${movie.backdrop_path})`}}>
+                <div className="backdrop-overlay"></div>
+                <div className="movie-poster">
+                    <img
+                        src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                        alt={`Poster of ${movie.title}`}
+                    />
+                </div>
+                <div className="movie-info">
+                    {error && <div className="error">{error}</div>}
+                    <h1>{movie.title}</h1>
+                    <p>{movie.overview}</p>
+                    <p>Average rating: {movie.vote_average} (number of votes: {movie.vote_count})</p>
+                    <p>Release date: {movie.release_date}</p>
+                    {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
+                    <p>Adult: {movie.adult ? 'Yes' : 'No'}</p>
+                    <p>Genres:</p>
+                    <ul>
+                        {movie.genres.map(genre => (
+                            <li key={genre.id}>
+                                <p>{genre.name}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                <div className="controls-container">
+                    <select value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)}>
+                        <option value="">Select a playlist</option>
+                        {playlists.map(playlist => (
+                            <option key={playlist.idPlaylist} value={playlist.idPlaylist}>{playlist.name}</option>
+                        ))}
+                    </select>
+                    <button className="button" onClick={handleAddToPlaylist}>Add to Playlist</button>
+                    <button className="button" onClick={handleAddToWatchlist}>Add to Watchlist</button>
+                </div>
+            </div>
+            <div className="movie-cast">
+                <h1>Cast</h1>
+                {cast.length !== 0 &&
+                <div className="cast-container">
+                    <button className="scroll-btn left" onClick={scrollLeft}>&lt;</button>
+                    <ul ref={castRef} className="cast">
+                        {cast.map(actor => (
+                            <li key={actor.id} className="cast-item">
+                                <div className="cast-item-content">
+                                    <img
+                                        src={actor.profile_path ? `${baseURL}${actor.profile_path}` : require('../No_image_poster.png')}
+                                        alt={`Image of ${actor.name}`}
+                                    />
+                                </div>
+                                <div className="cast-item-details">
+                                    <p>{actor.name} as {actor.character}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <button className="scroll-btn right" onClick={scrollRight}>&gt;</button>
+                </div>
+                }
+            </div>
+            <div className="review-container">
+                <MovieReviews movieId={movieId}/>
+            </div>
         </div>
     );
 };
 
-export default MovieDetails;
+export default withAuth(MovieDetails);

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import '../styles/components/_user_profile.scss'
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const UserPlaylists = () => {
     const [playlists, setPlaylists] = useState([]);
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchPlaylists = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if(token) {
@@ -20,10 +25,12 @@ const UserPlaylists = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać playlist');
+                        throw new Error('Failed to fetch user playlists');
                     }
                     const data = await response.json();
                     setPlaylists(data);
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -46,29 +53,30 @@ const UserPlaylists = () => {
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Błąd usuwania playlisty');
+                    throw new Error('Failed to delete user playlist');
                 }
 
                 setPlaylists(playlists.filter(playlist => playlist.idPlaylist !== playlistId));
+                setError('');
             }
         } catch (err) {
             setError(err.message);
         }
     };
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
         <div>
-            <h1>Twoje playlisty</h1>
+            <h1>Your Playlists</h1>
+            {error && <div className="error">{error}</div>}
             <ul>
                 {playlists.map(playlist => (
                     <li key={playlist.idPlaylist}>
                         <Link to={`/playlists/${playlist.idPlaylist}`}>{playlist.name}</Link>
-                        <button onClick={() => handleDelete(playlist.idPlaylist)}>Usuń</button>
+                        <button className="delete-playlist-btn" onClick={() => handleDelete(playlist.idPlaylist)}>Delete</button>
                     </li>
                 ))}
             </ul>
@@ -77,4 +85,4 @@ const UserPlaylists = () => {
 
 };
 
-export default UserPlaylists;
+export default withAuth(UserPlaylists);

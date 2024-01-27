@@ -1,0 +1,110 @@
+// Mixin to zestaw reguł CSS, które można ponownie wykorzystywać w całym projekcie.
+// Ten mixin centruje elementy z flexboxem.
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin transition($property: all, $duration: $transition-duration, $timing-function: ease) {
+  transition: $property $duration $timing-function;
+}
+
+@mixin focus-with-outline($color: $color-input-focus) {
+  &:focus {
+    outline: 0;
+    border-color: $color;
+    box-shadow: 0 0 0 0.2rem rgba($color, 0.25);
+  }
+}
+
+@mixin movies-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // Wyśrodkowanie wzdłuż osi głównej (pionowej)
+  justify-content: flex-start; // Wyrównanie do góry kontenera
+  min-height: 100vh;
+  background-color: $color-grey;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+
+  .page-title {
+    margin: 1% 0 4% 0;
+    width: 100%;
+    border-bottom: 2px solid $color-blue;
+  }
+
+  .movies-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    width: 100%;
+    padding-top: 20px;
+
+    .movie-item {
+      text-align: center;
+      position: relative;
+
+      img {
+        height: 225px;
+        width: 100%;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 5px;
+        font-size: 12px;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.8);
+        }
+      }
+
+      a {
+        color: $main-font-color;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+//// Mixin do stylizacji elementu statystyki
+//@mixin statistic-item-style($count) {
+//  padding: calculate-rem(10px);
+//  margin: calculate-rem(5px) 0;
+//  background-color: lighten($color-grey, 10%);
+//  border-radius: calculate-rem(5px);
+//  box-shadow: 0 calculate-rem(2px) calculate-rem(4px) rgba(0, 0, 0, 0.25);
+//  transition: background-color 0.3s ease;
+//
+//  // Instrukcja warunkowa, która zmienia kolor tła w zależności od liczby $count
+//  @if $count > 10 {
+//    background-color: lighten($color-blue, 20%);
+//  } @else if $count > 5 {
+//    background-color: lighten($color-blue, 10%);
+//  } @else {
+//    background-color: lighten($color-grey, 5%);
+//  }
+//}

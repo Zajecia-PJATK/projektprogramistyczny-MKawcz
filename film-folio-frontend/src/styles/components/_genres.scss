@@ -1,0 +1,20 @@
+.genres-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Odstępy pomiędzy elementami */
+  margin-bottom: 20px; /* Dodaje odstęp na dole, przed przyciskiem */
+}
+
+.genre-item {
+  flex-basis: calc(33.333% - 10px); /* Przykładowa szerokość elementu */
+  display: flex;
+  align-items: center;
+}
+
+/* Styl dla przycisku umieszczający go na dole i na środku */
+.form-button {
+  width: 100%; /* Zajmuje pełną szerokość kontenera */
+  display: flex; /* Umożliwia centrowanie tekstu w przycisku */
+  justify-content: flex-start;
+  margin-top: 10px; /* Dodatkowy odstęp od ostatniego rzędu gatunków */
+}

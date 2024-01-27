@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link} from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import "../styles/components/_playlist_details.scss";
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const PlaylistDetails = () => {
     const [playlist, setPlaylist] = useState(null);
@@ -8,10 +11,12 @@ const PlaylistDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState('');
     const { playlistId } = useParams();
+    const [isLoading, setIsLoading] = useState(true);
     const baseURL = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
         const fetchPlaylistDetails = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -24,12 +29,14 @@ const PlaylistDetails = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać szczegółów playlisty');
+                        throw new Error('Failed to fetch playlist details');
                     }
 
                     const data = await response.json();
                     setPlaylist(data);
                     setEditablePlaylist({ name: data.name, description: data.description });
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -38,6 +45,14 @@ const PlaylistDetails = () => {
 
         fetchPlaylistDetails();
     }, [playlistId]);
+
+    const validateName = (name) => {
+        return name.length > 0 && name.length <= 50;
+    };
+
+    const validateDescription = (description) => {
+        return description.length > 0 && description.length <= 1000;
+    };
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -49,6 +64,17 @@ const PlaylistDetails = () => {
 
     const handleUpdateSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateName(editablePlaylist.name)) {
+            setError('Playlist name cannot be blank and should be max 50 characters long');
+            return;
+        }
+
+        if (!validateDescription(editablePlaylist.description)) {
+            setError('Playlist description cannot be blank and should be max 1000 characters long');
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
             if (token) {
@@ -65,7 +91,7 @@ const PlaylistDetails = () => {
 
                 if (!updateResponse.ok) {
                     const errorData = await updateResponse.json();
-                    throw new Error(errorData.message || 'Błąd aktualizacji playlisty');
+                    throw new Error(errorData.message || 'Failed to update playlist');
                 }
 
                 // Ponowne pobranie pełnych danych playlisty po aktualizacji
@@ -76,12 +102,13 @@ const PlaylistDetails = () => {
                 });
 
                 if (!fetchResponse.ok) {
-                    throw new Error('Błąd podczas pobierania aktualizowanych danych playlisty');
+                    throw new Error('Failed to fetch updated playlist');
                 }
 
                 const updatedPlaylistData = await fetchResponse.json();
                 setPlaylist(updatedPlaylistData);
                 setIsEditing(false);
+                setError('');
             }
         } catch (err) {
             setError(err.message);
@@ -102,28 +129,25 @@ const PlaylistDetails = () => {
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Błąd usuwania filmu z playlisty');
+                    throw new Error('Failed to delete movie from playlist');
                 }
 
                 const updatedMovies = playlist.movies.filter(movie => movie.id !== tmdbIdMovie);
                 setPlaylist({ ...playlist, movies: updatedMovies });
+                setError('');
             }
         } catch (err) {
             setError(err.message);
         }
     };
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
-    }
-
-    if (!playlist) {
-        return <div>Ładowanie...</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
-        <div>
+        <div className="playlist-details-container">
+            {error && <div className="error">{error}</div>}
             {isEditing ? (
                 <form onSubmit={handleUpdateSubmit}>
                     <input
@@ -137,28 +161,37 @@ const PlaylistDetails = () => {
                         value={editablePlaylist.description}
                         onChange={handleUpdateChange}
                     />
-                    <button type="submit">Zapisz zmiany</button>
+                    <button className="button" type="submit">Zapisz zmiany</button>
                 </form>
             ) : (
                 <>
-                    <h1>{playlist.name}</h1>
-                    <p>{playlist.description}</p>
-                    <button onClick={handleEditClick}>Edytuj</button>
-                    {playlist && playlist.movies && playlist.movies.map(movie => (
-                        <div key={movie.id}>
-                            <Link to={`/movies/${movie.id}`}>
-                                <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
-                            </Link>
-                            <Link to={`/movies/${movie.id}`}>
-                                <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
-                            </Link>
-                            <button onClick={() => handleDeleteMovie(movie.id)}>Usuń</button>
+                    <div className="header">
+                        <div>
+                            <h1>{playlist.name}</h1>
+                            <p>{playlist.description}</p>
                         </div>
-                    ))}
+                        <button className="edit-btn" onClick={handleEditClick}>Edit</button>
+                    </div>
                 </>
             )}
+            <div className="movies-container">
+                {playlist.movies.map(movie => (
+                    <div key={movie.id} className="movie-item">
+                        <Link to={`/movies/${movie.id}`}>
+                            <img
+                                src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                                alt={`Poster of ${movie.title}`}
+                            />
+                        </Link>
+                        <Link to={`/movies/${movie.id}`}>
+                            <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
+                        </Link>
+                        <button className="delete-btn" onClick={() => handleDeleteMovie(movie.id)}>X</button>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
 
-export default PlaylistDetails;
+export default withAuth(PlaylistDetails);

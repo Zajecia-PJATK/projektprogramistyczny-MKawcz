@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import "../styles/components/_popular_movies.scss"
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const PopularMovies = () => {
     const [movies, setMovies] = useState([]);
     const [error, setError] = useState('');
     const baseURL = "https://image.tmdb.org/t/p/w500";
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchMovies = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -18,11 +23,13 @@ const PopularMovies = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać filmów');
+                        throw new Error('Failed to fetch movies');
                     }
 
                     const data = await response.json();
                     setMovies(data);
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -32,27 +39,33 @@ const PopularMovies = () => {
         fetchMovies();
     }, []);
 
-    if(error) {
-        return <div>Błąd: {error}</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
-        <div>
-            <h1>Popularne filmy</h1>
-            <ul>
-                {movies.map(movie => (
-                    <li key={movie.id}>
+        <div className="popular-movies-container">
+           <div className="page-title">
+               <h1>Popular Movies</h1>
+           </div>
+            <div className="movies-container">
+                {error && <div className="error">{error}</div>}
+                {movies.map((movie, index) => (
+                    <div key={movie.id} data-index={index + 1} className="movie-item">
                         <Link to={`/movies/${movie.id}`}>
-                            <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
+                            <img
+                                src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                                alt={`Poster of ${movie.title}`}
+                            />
                         </Link>
                         <Link to={`/movies/${movie.id}`}>
                             <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
                         </Link>
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }
 
-export default PopularMovies;
+export default withAuth(PopularMovies);

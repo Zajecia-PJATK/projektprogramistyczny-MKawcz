@@ -1,0 +1,19 @@
+// Placeholder selector (%flex-center) pozwala na dziedziczenie stylów bez generowania niepotrzebnego CSS.
+// Używając @extend, komponenty mogą dziedziczyć ten styl, nie duplikując kodu.
+%flex-center {
+  @include flex-center;
+}
+
+body {
+  background-color: $color-dark;
+  color: $main-font-color;
+  font-family:$main-font;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: darkred;
+}

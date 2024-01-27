@@ -1,0 +1,39 @@
+@import "../utils/variables";
+
+.users-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // Wyśrodkowanie wzdłuż osi głównej (pionowej)
+  justify-content: flex-start; // Wyrównanie do góry kontenera
+  background-color: $color-grey;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+
+  .page-title {
+    margin: 1% 0 4% 0;
+    width: 100%;
+    border-bottom: 2px solid $color-blue;
+  }
+
+  .users-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    width: 100%;
+    padding-top: 20px;
+
+    .user-item {
+      text-align: center;
+      position: relative;
+
+      .user-data {
+        margin-top: 10%;
+      }
+    }
+  }
+
+}

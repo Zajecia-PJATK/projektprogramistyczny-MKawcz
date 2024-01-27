@@ -1,0 +1,136 @@
+@import "../main";
+
+.navigation-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $color-grey;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1000; // Zapewnia, że nawigacja jest zawsze na wierzchu
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+
+  .logo {
+    margin-right: 2rem; // Zwiększona odległość od loga do MOVIES
+    img {
+      height: 40px;
+      transition: transform 0.3s ease; // Dodaje płynność animacji
+
+      &:hover {
+        transform: scale(1.1); // Powiększa obrazek
+      }
+    }
+  }
+
+  .menu-items {
+    flex-grow: 1;
+    justify-content: flex-start;
+
+    nav ul {
+      display: flex;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+
+      li {
+        position: relative;
+        margin-right: 20px;
+
+
+        &.dropdown, &.search-item {
+          a, span {
+            color: $color-blue;
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+          }
+
+          span {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: background-color $transition-duration;
+
+            &:hover {
+              background-color: darken($color-grey, 10%);
+            }
+          }
+
+          .dropdown-content {
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            position: absolute;
+            background-color: $color-grey;
+            border-radius: 10px;
+            min-width: 160px;
+            display: none;
+            z-index: 1;
+            list-style: none;
+
+            li a {
+              display: block;
+              width: 100%;
+              padding: 10px;
+              color: $color-blue;
+              border-radius: 10px;
+              text-decoration: none;
+              white-space: nowrap; // Zapobiega zawijaniu tekstu
+              transition: background-color $transition-duration;
+
+              &:hover {
+                background-color: darken($color-grey, 10%);
+              }
+            }
+          }
+
+          &:hover .dropdown-content {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  .search-item {
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+
+      input[type="text"], input[type="checkbox"] + label, .button {
+        margin: 5px 0; // Zapewnia odstępy pomiędzy elementami formularza
+        width: auto; // Dostosowuje szerokość do zawartości
+        min-width: 200px; // Zapewnia minimalną szerokość dla elementów
+      }
+
+      label {
+        display: flex;
+        align-items: center; // Wyśrodkowuje checkbox i tekst pionowo
+        justify-content: center; // Wyśrodkowuje poziomo w kontenerze
+        width: 100%; // Zapewnia, że label zajmuje całą dostępną szerokość
+
+        input[type="checkbox"] {
+          margin-right: 5px; // Dodaje odstęp między checkboxem a tekstem
+        }
+      }
+    }
+  }
+
+  .profile {
+    margin-left: auto;
+
+    a {
+      color: $color-blue;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      transition: background-color $transition-duration;
+
+      &:hover {
+        background-color: darken($color-grey, 10%);
+      }
+    }
+  }
+}

@@ -59,10 +59,6 @@ public class AdminService {
 
         movie.setTitle(updatedMovieDto.getTitle());
         movie.setOverview(updatedMovieDto.getOverview());
-//        movie.setPosterPath(updatedMovieDto.getPosterPath());
-//        movie.setBackdropPath(updatedMovieDto.getBackdropPath());
-//        movie.setVoteAverage(updatedMovieDto.getVoteAverage());
-//        movie.setVoteCount(updatedMovieDto.getVoteCount());
         movie.setReleaseDate(updatedMovieDto.getReleaseDate());
         movie.setRuntime(updatedMovieDto.getRuntime());
         movie.setAdult(updatedMovieDto.getAdult());

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/components/_form_styles.scss';
 
 const RegisterForm = () => {
     const [username, setUsername] = useState('');
@@ -10,6 +11,24 @@ const RegisterForm = () => {
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Frontend validation
+        if (!validateUsername(username)) {
+            setError('Field username should be non-empty and max 50 characters long');
+            setIsRegistered(false);
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            setError('Provided email has an invalid format');
+            setIsRegistered(false);
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            setError('Password should be between 6 and 16 characters long, contain at least 1 number and at least 1 uppercase letter');
+            setIsRegistered(false);
+            return;
+        }
         try {
             const response = await fetch('http://localhost:8080/api/users/register', {
                 method: 'POST',
@@ -20,58 +39,77 @@ const RegisterForm = () => {
             });
             if(!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Błąd rejestracji');
+                throw new Error(errorData.message);
             }
             setIsRegistered(true);
-            // const data = await response.json();
-            // console.log(data);
-            // Przekierowanie lub zapisanie tokena JWT
+
+            setUsername('');
+            setEmail('');
+            setPassword('');
+            setError('');
         } catch (err) {
             setError(err.message);
         }
+    };
+
+    const validateUsername = (username) => {
+        return username.length > 0 && username.length <= 50;
+    };
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validatePassword = (password) => {
+        const passwordRegex = /^(?=.*\d)(?=.*[A-Z]).{6,16}$/;
+
+        return passwordRegex.test(password);
     };
 
     const handleGoToLogin = () => {
         navigate('/login');
     };
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
-    }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Nazwa użytkownika"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Email"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Hasło"
-                    />
-                </div>
-                <div>
-                    <button type="submit">Zarejestruj się</button>
-                </div>
-            </form>
-            {isRegistered && <p>Rejestracja zakończona sukcesem!</p>}
-            <button onClick={handleGoToLogin}>Przejdź do logowania</button>
+        <div className="centered-container">
+            <div className="form-container">
+                <img src={require('../filmFolio.png')} alt="FilmFolio Logo" className="logo"/>
+                {error && <p className="error">{error}</p>}
+                {isRegistered &&  <p className="success">Rejestracja zakończona sukcesem!</p>}
+                <form noValidate onSubmit={handleSubmit}>
+                    <div>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Username"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                        />
+                    </div>
+                    <div>
+                        <button className="button" type="submit">Register</button>
+                    </div>
+                </form>
+                <p>Or</p>
+                <button className="button button-go-to-login" onClick={handleGoToLogin}>Go to login</button>
+            </div>
         </div>
     );
 };

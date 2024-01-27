@@ -65,8 +65,6 @@ public class MovieService {
             throw new ResourceNotFoundException("No movie found with the TMDB id: " + tmdbIdMovie);
         }
 
-        //TODO trzeba będzie tu dodać zamianę genre_ids i pobieranie ich po id, żeby je wyświetlić
-
         return response.getBody();
     }
 

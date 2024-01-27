@@ -4,9 +4,13 @@ import com.example.filmfoliobackend.dto.MovieDto;
 import com.example.filmfoliobackend.dto.ReviewDto;
 import com.example.filmfoliobackend.response.TMDBResponse;
 import com.example.filmfoliobackend.service.MovieService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +41,10 @@ public class MovieController {
     }
 
     @GetMapping("/search")
-    public CompletableFuture<ResponseEntity<List<MovieDto>>> searchMoviesByTitle(@RequestParam String query, @RequestParam Boolean includeAdult, @RequestParam String primaryReleaseDate) {
+    public CompletableFuture<ResponseEntity<List<MovieDto>>> searchMoviesByTitle(
+            @RequestParam @NotBlank String query,
+            @RequestParam(required = false) Boolean includeAdult,
+            @RequestParam(required = false) @Pattern(regexp = "(^$|\\d{4})", message = "Invalid year format") String primaryReleaseDate) {
         return movieService.searchMovies(query, includeAdult, primaryReleaseDate)
                 .thenApply(ResponseEntity::ok);
     }
@@ -55,9 +62,17 @@ public class MovieController {
             @RequestParam(required = false, defaultValue = "popularity.desc") String sortBy,
             @RequestParam(required = false, defaultValue = "false") Boolean includeAdult,
             @RequestParam(required = false, defaultValue = "false") Boolean includeVideo,
-            @RequestParam(required = false) Integer primaryReleaseYear,
+            @RequestParam(required = false) @Pattern(regexp = "(^$|\\d{4})", message = "Invalid year format") String primaryReleaseYear,
             @RequestParam(required = false) String withGenres
     ) {
+        Integer year = null;
+        if (primaryReleaseYear != null && !primaryReleaseYear.isEmpty()) {
+            try {
+                year = Integer.parseInt(primaryReleaseYear);
+            } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid year format");
+            }
+        }
 
         return movieService.discoverMovies(
                         language,
@@ -65,7 +80,7 @@ public class MovieController {
                         sortBy,
                         includeAdult,
                         includeVideo,
-                        primaryReleaseYear,
+                        year,
                         withGenres
                 )
                 .thenApply(ResponseEntity::ok);

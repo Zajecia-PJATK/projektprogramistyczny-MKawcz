@@ -1,0 +1,76 @@
+@import "../utils/variables";
+@import "../utils/mixins";
+
+.form-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.form-container {
+  background: $color-grey;
+  padding: 20px;
+  border-radius: 10px;
+  width: 50%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  .close-form-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 24px;
+
+    &:hover {
+      background-color: darken($color-grey, 5%);
+    }
+  }
+
+  h3 {
+    color: white;
+    text-align: center;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    textarea {
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+
+  button {
+    align-self: center;
+  }
+}

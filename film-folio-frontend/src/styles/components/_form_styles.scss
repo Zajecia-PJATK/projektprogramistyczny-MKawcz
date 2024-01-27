@@ -1,0 +1,30 @@
+@import "../main";
+
+.centered-container {
+  @extend %flex-center;
+  min-height: 100vh; // Ustawienie minimalnej wysokości na 100% wysokości viewportu
+  text-align: center; // Centrowanie tekstu dla elementów wewnątrz
+
+  .form-container {
+    padding: 20px;
+    background: $color-grey; // Tło dla formularza
+    border-radius: 8px; // Zaokrąglone rogi
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 320px; // Maksymalna szerokość formularza
+    margin: 15px; // Odstęp od krawędzi kontenera
+
+    img.logo {
+      max-width: 100%; // Logo nie będzie większe niż formularz
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    input, .button {
+      width: calc(100% - 20px); // Odejmowanie paddingu
+      margin: 10px 0; // Odstępy między inputami i przyciskiem
+      padding: 10px;
+    }
+
+  }
+}

@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {jwtDecode} from "jwt-decode";
-
+import "../styles/components/_genres.scss"
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 const GenrePreferences = ({ updatePreferences }) => {
     const [genres, setGenres] = useState([]);
     const [selectedGenres, setSelectedGenres] = useState(new Set());
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchGenres = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -18,11 +22,13 @@ const GenrePreferences = ({ updatePreferences }) => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać gatunków');
+                        throw new Error('Failed to fetch genres');
                     }
 
                     const data = await response.json();
                     setGenres(data);
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -41,13 +47,14 @@ const GenrePreferences = ({ updatePreferences }) => {
                         }
                     });
                     if (!response.ok) {
-                        throw new Error('Nie udało się pobrać preferencji');
+                        throw new Error('Failed to fetch preferences');
                     }
 
                     const preferences = await response.json();
                     // Ustawienie zaznaczonych gatunków na podstawie pobranych preferencji
                     const genreIds = new Set(preferences.map(genre => genre.id));
                     setSelectedGenres(genreIds);
+                    setError('');
                 }
             } catch (err) {
                 setError(err.message);
@@ -83,7 +90,7 @@ const GenrePreferences = ({ updatePreferences }) => {
 
     const handleSubmit = async () => {
         if (selectedGenres.size !== 3) {
-            alert('Musisz wybrać dokładnie 3 gatunki.');
+            alert('You have to choose 3 genres');
             return; // Przerwij funkcję, jeśli nie wybrano dokładnie 3 gatunków
         }
 
@@ -104,28 +111,30 @@ const GenrePreferences = ({ updatePreferences }) => {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Nie udało się zaktualizować preferencji');
+                    throw new Error('Failed to update preferences');
                 }
 
                 updatePreferences(Array.from(selectedGenres));
-                alert('Preferencje zostały zaktualizowane.');
+                setError('');
+                alert('Preferences updated successfully');
+                window.location.reload();
             }
         } catch (err) {
             setError(err.message);
         }
     }
 
-    if (error) {
-        return <div>Błąd: {error}</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
         <div>
-            <h2>Wybierz swoje ulubione gatunki filmowe:</h2>
-            {error && <p>{error}</p>}
-            <form onSubmit={(e) => e.preventDefault()}>
+            <h2>Choose your favorite movie genres:</h2>
+            {error && <p className="error">{error}</p>}
+            <form onSubmit={(e) => e.preventDefault()} className="genres-container">
                 {genres.map(genre => (
-                    <div key={genre.id}>
+                    <div key={genre.id} className="genre-item">
                         <input
                             type="checkbox"
                             id={`genre-${genre.id}`}
@@ -138,10 +147,13 @@ const GenrePreferences = ({ updatePreferences }) => {
                         <label htmlFor={`genre-${genre.id}`}>{genre.name}</label>
                     </div>
                 ))}
-                <button type="button" onClick={handleSubmit}>Zapisz preferencje</button>
+                <div className="form-button">
+                    <button className="button" type="button" onClick={handleSubmit}>Save Your Preferences</button>
+                </div>
             </form>
         </div>
     );
+
 };
 
-export default GenrePreferences;
+export default withAuth(GenrePreferences);

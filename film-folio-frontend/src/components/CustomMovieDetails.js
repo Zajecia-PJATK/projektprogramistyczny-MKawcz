@@ -2,6 +2,9 @@ import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import MovieEditForm from "./MovieEditForm";
+import '../styles/components/_movie_details.scss'
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const CustomMovieDetails = () => {
     const [movie, setMovie] = useState(null);
@@ -9,9 +12,12 @@ const CustomMovieDetails = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const {movieId} = useParams();
+    const [isLoading, setIsLoading] = useState(true);
+    const baseURL = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
         const fetchMovieDetails = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -23,8 +29,14 @@ const CustomMovieDetails = () => {
                         }
                     });
 
+                    if(!response.ok) {
+                        throw new Error('Failed to fetch movie details');
+                    }
+
                     const data = await response.json();
                     setMovie(data);
+                    setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -43,36 +55,43 @@ const CustomMovieDetails = () => {
         setShowEditForm(!showEditForm);
     };
 
-
-    if (error) {
-        return <div>Błąd: {error}</div>;
-    }
-
-    if (!movie) {
-        return <div>Ładowanie...</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
-        <div>
-            <h1>{movie.title}</h1>
-            {/*<img src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>*/}
-            {/*<img src={`${baseURL}${movie.backdrop_path}`} alt={`Tło filmu ${movie.title}`}/>*/}
-            <p>{movie.overview}</p>
-            {/*<p>Średnia ocena: {movie.vote_average} (Liczba głosów: {movie.vote_count})</p>*/}
-            <p>Data wydania: {movie.release_date}</p>
-            {movie.runtime && <p>Czas trwania: {movie.runtime} minut</p>}
-            <p>Dla dorosłych: {movie.adult ? 'Tak' : 'Nie'}</p>
+        <div className="movie-details">
+            <div className="movie-content" style={{backgroundImage: `url(${baseURL}${movie.backdrop_path})`}}>
+                {error && <p className="error">{error}</p>}
+                <div className="backdrop-overlay"></div>
+                <div className="movie-poster">
+                    <img
+                        src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                        alt={`Poster of ${movie.title}`}
+                    />
+                </div>
+                <div className="movie-info">
+                    <h1>{movie.title}</h1>
+                    <p>{movie.overview}</p>
+                    <p>Release date: {movie.release_date}</p>
+                    {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
+                    <p>Adult: {movie.adult ? 'Yes' : 'No'}</p>
+                </div>
+                <div className="controls-container">
+                    {isAdmin && (
+                        <button className="button" onClick={toggleEditForm}>Edit Movie</button>
+                    )}
 
-            {isAdmin && (
-                <button onClick={toggleEditForm}>
-                    {showEditForm ? 'Ukryj formularz edycji' : 'Edytuj film'}
-                </button>
-            )}
-
-            {showEditForm && <MovieEditForm movie={movie} onSave={onMovieUpdate} />}
-
+                    {showEditForm &&
+                        <MovieEditForm
+                            movie={movie}
+                            onSave={onMovieUpdate}
+                            onClose={() => setShowEditForm(false)}
+                        />}
+                </div>
+            </div>
         </div>
     );
 };
 
-export default CustomMovieDetails;
+export default withAuth(CustomMovieDetails);

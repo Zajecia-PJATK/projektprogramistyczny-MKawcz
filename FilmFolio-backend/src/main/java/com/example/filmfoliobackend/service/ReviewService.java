@@ -37,7 +37,7 @@ public class ReviewService {
 
         boolean reviewExists = reviewRepository.findByUserAndMovie(user, movie).isPresent();
         if (reviewExists) {
-            throw new ResourceOwnershipException("User " + user.getActualUsername() + " has already reviewed movie " + movie.getTitle());
+            throw new ResourceOwnershipException(user.getActualUsername() + " has already reviewed movie " + movie.getTitle());
         }
 
         Review review = ReviewMapper.toDocument(reviewDto);

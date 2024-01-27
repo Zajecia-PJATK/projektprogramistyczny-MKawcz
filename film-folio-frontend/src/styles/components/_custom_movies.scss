@@ -1,0 +1,15 @@
+@import "../utils/variables";
+@import "../utils/mixins";
+
+.custom-movies-container {
+  @include movies-layout;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    button {
+      margin: 1%;
+    }
+  }
+}

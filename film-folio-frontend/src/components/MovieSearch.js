@@ -1,10 +1,14 @@
 import React, { useState, useEffect  } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import '../styles/components/_search_movies.scss';
+import withAuth from "./withAuth";
+import Loader from "./Loader";
 
 const MovieSearch = () => {
     const [movies, setMovies] = useState([]);
     const [error, setError] = useState('');
     const [searchParams] = useSearchParams();
+    const [isLoading, setIsLoading] = useState(true);
     const baseURL = "https://image.tmdb.org/t/p/w500";
 
     useEffect(() => {
@@ -13,6 +17,7 @@ const MovieSearch = () => {
         const primaryReleaseDate = searchParams.get('primaryReleaseDate');
         if (query) {
             const fetchMovies = async () => {
+                setIsLoading(true);
                 try {
                     const token = localStorage.getItem('token');
                     if (token) {
@@ -23,10 +28,12 @@ const MovieSearch = () => {
                         });
 
                         if (!response.ok) {
-                            throw new Error('Błąd wyszukiwania');
+                            throw new Error('Failed to search for movies');
                         }
                         const data = await response.json();
                         setMovies(data);
+                        setError('');
+                        setIsLoading(false);
                     }
                 } catch (err) {
                     setError(err.message);
@@ -36,27 +43,34 @@ const MovieSearch = () => {
         }
     }, [searchParams]);
 
-    if(error) {
-        return <div>Błąd: {error}</div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
     return (
-        <div>
-            <h1>Wyniki wyszukiwania</h1>
-            <ul>
-                {movies.map(movie => (
-                    <li key={movie.id}>
+        <div className="search-movies-container">
+            <div className="page-title">
+                <h1>Search Results</h1>
+            </div>
+            <div className="movies-container">
+                {error && <div className="error">{error}</div>}
+                {movies.length === 0 && <di>Brak wyników :(</di>}
+                {movies.map((movie, index) => (
+                    <div key={movie.id} data-index={index + 1} className="movie-item">
                         <Link to={`/movies/${movie.id}`}>
-                            <img width="150" height="200" src={`${baseURL}${movie.poster_path}`} alt={`Plakat filmu ${movie.title}`}/>
+                            <img
+                                src={movie.poster_path ? `${baseURL}${movie.poster_path}` : require('../No_image_poster.png')}
+                                alt={`Poster of ${movie.title}`}
+                            />
                         </Link>
                         <Link to={`/movies/${movie.id}`}>
                             <p>{movie.title} ({movie.release_date.slice(0, 4)})</p>
                         </Link>
-                    </li>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 };
 
-export default MovieSearch;
+export default withAuth(MovieSearch);
