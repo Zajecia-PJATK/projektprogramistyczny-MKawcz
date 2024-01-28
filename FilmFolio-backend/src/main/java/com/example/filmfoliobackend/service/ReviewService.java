@@ -14,6 +14,9 @@ import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.repository.ReviewRepository;
 import com.example.filmfoliobackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,9 +29,14 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MovieService movieService;
 
-    public List<ReviewDto> createReview(String idUser, Long tmdbIdmovie, ReviewDto reviewDto) {
+    public List<ReviewDto> createReview(String idUser, Long tmdbIdmovie, ReviewDto reviewDto, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         MovieDto movieDto = movieService.getMovie(tmdbIdmovie);
 
@@ -64,9 +72,14 @@ public class ReviewService {
         return movieReviewsDto;
     }
 
-    public List<ReviewDto> deleteReview(String idUser, Long tmdbIdmovie, String reviewId) {
+    public List<ReviewDto> deleteReview(String idUser, Long tmdbIdmovie, String reviewId, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdmovie)
                 .orElseThrow(() -> new MovieNotFoundException("No movie found in the database with the TMDB id: " + tmdbIdmovie));
@@ -77,10 +90,6 @@ public class ReviewService {
         if(!reviewRepository.existsByIdReviewAndUser(reviewId, user)) {
             throw new ResourceOwnershipException("Review with ID " + reviewId + " does not belong to the user " + user.getActualUsername());
         }
-
-//        if(!reviewRepository.existsByIdReviewAndMovieTmdbIdMovie(reviewId, tmdbIdmovie)) {
-//            throw new RuntimeException("Review with the id does not belong to the movie with TMDB id");
-//        }
 
         boolean isReviewPresentInMovie = movie.getReviews().stream()
                 .anyMatch(r -> r.getIdReview().equals(reviewId));

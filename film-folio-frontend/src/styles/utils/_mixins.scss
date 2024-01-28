@@ -90,21 +90,4 @@
   }
 }
 
-//// Mixin do stylizacji elementu statystyki
-//@mixin statistic-item-style($count) {
-//  padding: calculate-rem(10px);
-//  margin: calculate-rem(5px) 0;
-//  background-color: lighten($color-grey, 10%);
-//  border-radius: calculate-rem(5px);
-//  box-shadow: 0 calculate-rem(2px) calculate-rem(4px) rgba(0, 0, 0, 0.25);
-//  transition: background-color 0.3s ease;
-//
-//  // Instrukcja warunkowa, która zmienia kolor tła w zależności od liczby $count
-//  @if $count > 10 {
-//    background-color: lighten($color-blue, 20%);
-//  } @else if $count > 5 {
-//    background-color: lighten($color-blue, 10%);
-//  } @else {
-//    background-color: lighten($color-grey, 5%);
-//  }
-//}
+

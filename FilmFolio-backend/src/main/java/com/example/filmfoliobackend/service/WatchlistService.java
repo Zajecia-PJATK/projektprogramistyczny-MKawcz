@@ -12,6 +12,9 @@ import com.example.filmfoliobackend.repository.GenreRepository;
 import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.YearMonth;
@@ -28,20 +31,31 @@ public class WatchlistService {
     private final MovieRepository movieRepository;
     private final MovieService movieService;
 
-    public List<MovieDto> getUserWatchlist(String idUser) {
+    public List<MovieDto> getUserWatchlist(String idUser, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         List<MovieDto> watchlistDto = user.getWatchlist().stream().map(MovieMapper::toDto).toList();
 
         return watchlistDto;
     }
 
-    public List<MovieDto> addMovieToWatchlist(String idUser, MovieDto movieDto) {
+    public List<MovieDto> addMovieToWatchlist(String idUser, MovieDto movieDto, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
+
         Movie movie = movieService.saveMovieOrReturnExisting(movieDto);
+
 
         boolean isMoviePresentInUserWatchlist = user.getWatchlist().stream()
                 .anyMatch(m -> m.getTmdbIdMovie().equals(movie.getTmdbIdMovie()));
@@ -63,19 +77,20 @@ public class WatchlistService {
         user.getMonthlyWatchStats().merge(currentMonth, 1, Integer::sum);
         userRepository.save(user);
 
-        return getUserWatchlist(idUser);
+        return user.getWatchlist().stream().map(MovieMapper::toDto).toList();
     }
 
-    public List<MovieDto> deleteMovieFromWatchlist(String idUser, Long tmdbIdMovie) {
+    public List<MovieDto> deleteMovieFromWatchlist(String idUser, Long tmdbIdMovie, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdMovie)
                 .orElseThrow(() -> new MovieNotFoundException("No movie found with TMDB id: " + tmdbIdMovie));
 
-//        if(!userRepository.existsByIdUserAndWatchlistTmdbIdMovie(user.getIdUser(), tmdbIdMovie)) {
-//            throw new RuntimeException("Movie with the given TMDB id doesn't belong to the watchlist of the users with the given id");
-//        }
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         boolean isMoviePresentInUserWatchlist = user.getWatchlist().stream()
                 .anyMatch(m -> m.getTmdbIdMovie().equals(tmdbIdMovie));
@@ -98,12 +113,20 @@ public class WatchlistService {
         userRepository.save(user);
         movieRepository.save(movie);
 
-        return getUserWatchlist(idUser);
+        return user.getWatchlist().stream().map(MovieMapper::toDto).toList();
     }
 
-    public List<GenreDto> getPopularGenresFromWatchlistMovies(String idUser) {
+    public List<GenreDto> getPopularGenresFromWatchlistMovies(String idUser, Authentication authentication) {
+        User user = userRepository.findByIdUser(idUser)
+                .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
+
         List<GenreDto> genreDtos = new ArrayList<>();
-        getUserWatchlist(idUser).forEach(m -> genreDtos.addAll(m.getGenres()));
+        getUserWatchlist(idUser, authentication).forEach(m -> genreDtos.addAll(m.getGenres()));
 
         List<GenreDto> top3Genres = genreDtos.stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())) // Zlicza wystąpienia

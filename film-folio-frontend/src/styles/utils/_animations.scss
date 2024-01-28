@@ -1,8 +1,0 @@
-@mixin rotate-scale($rotation: 45deg, $scale: 1.1) {
-  transform: rotate($rotation) scale($scale);
-  transition: transform 0.5s ease-in-out;
-}
-
-.element:hover {
-  @include rotate-scale(90deg, 1.2);
-}

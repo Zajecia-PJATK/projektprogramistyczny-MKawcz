@@ -10,6 +10,7 @@ import java.util.List;
 public class MovieDto {
     private String idMovie;
     @JsonProperty("id")
+    @Min(0)
     private Long tmdbIdMovie;
     @NotBlank(message = "Movie title cannot be blank")
     @Size(max=50, message = "Movie title should be max 50 characters long")

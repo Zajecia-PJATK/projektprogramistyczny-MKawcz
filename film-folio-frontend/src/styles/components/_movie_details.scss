@@ -66,6 +66,10 @@
         margin: 10px 0;
       }
 
+      span::after {
+        content:" minutes";
+      }
+
       ul {
         list-style-type: none;
         padding-left: 0;

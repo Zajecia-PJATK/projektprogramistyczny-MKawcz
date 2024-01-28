@@ -5,6 +5,7 @@ import com.example.filmfoliobackend.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/{movieId}/reviews")
-    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String idUser, @PathVariable Long movieId, @RequestBody @Valid ReviewDto reviewDto) {
-        List<ReviewDto> reviews = reviewService.createReview(idUser, movieId, reviewDto);
+    public ResponseEntity<List<ReviewDto>> createReview(@RequestParam String idUser, @PathVariable Long movieId, @RequestBody @Valid ReviewDto reviewDto, Authentication authentication) {
+        List<ReviewDto> reviews = reviewService.createReview(idUser, movieId, reviewDto, authentication);
         return ResponseEntity.ok(reviews);
     }
 
@@ -29,8 +30,8 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{movieId}/reviews/{reviewId}")
-    public ResponseEntity<List<ReviewDto>> deleteReview(@RequestParam String idUser, @PathVariable Long movieId, @PathVariable String reviewId) {
-        List<ReviewDto> reviews = reviewService.deleteReview(idUser, movieId, reviewId);
+    public ResponseEntity<List<ReviewDto>> deleteReview(@RequestParam String idUser, @PathVariable Long movieId, @PathVariable String reviewId, Authentication authentication) {
+        List<ReviewDto> reviews = reviewService.deleteReview(idUser, movieId, reviewId, authentication);
         return ResponseEntity.ok(reviews);
     }
 

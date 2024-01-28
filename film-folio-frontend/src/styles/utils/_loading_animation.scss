@@ -1,4 +1,3 @@
-/* Loader.css */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -18,3 +17,8 @@
 .spinner {
   animation: spin 1s linear infinite;
 }
+
+
+//@keyframes w CSS to reguła, która pozwala tworzyć animacje poprzez określenie stylów
+// dla różnych momentów animacji. Dzięki @keyframes, możesz kontrolować zmiany wyglądu
+// elementu w określonych momentach czasowych w trakcie trwania animacji.

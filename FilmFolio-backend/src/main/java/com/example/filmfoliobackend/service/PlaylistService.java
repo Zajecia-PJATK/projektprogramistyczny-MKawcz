@@ -13,6 +13,9 @@ import com.example.filmfoliobackend.repository.MovieRepository;
 import com.example.filmfoliobackend.repository.PlaylistRepository;
 import com.example.filmfoliobackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,18 +29,28 @@ public class PlaylistService {
     private final UserRepository userRepository;
     private final MovieService movieService;
 
-    public List<PlaylistDto> getPlaylists(String idUser) {
+    public List<PlaylistDto> getPlaylists(String idUser, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         List<PlaylistDto> playlistsDto = user.getPlaylists().stream().map(PlaylistMapper::toDto).toList();
 
         return playlistsDto;
     }
 
-    public PlaylistDto getPlaylist(String idUser, String playlistId) {
+    public PlaylistDto getPlaylist(String idUser, String playlistId, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
                 .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
@@ -56,11 +69,16 @@ public class PlaylistService {
         return playlistDto;
     }
 
-    public PlaylistDto createPlaylist(String idUser, PlaylistDto playlistDto) {
+    public PlaylistDto createPlaylist(String idUser, PlaylistDto playlistDto, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
 
-        if(playlistRepository.existsByName(playlistDto.getName())) {
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        if(playlistRepository.existsByNameAndUser(playlistDto.getName(), user)) {
             throw new DuplicateResourceException("Playlist with the name already exists: " + playlistDto.getName());
         }
 
@@ -74,9 +92,14 @@ public class PlaylistService {
         return PlaylistMapper.toDto(playlist);
     }
 
-    public PlaylistDto updatePlaylist(String idUser, String playlistId , PlaylistDto playlistDto) {   //TODO po stronie Fronta trzeba będzie dać domyślne wartości (te które są zapisane obecnie) aby nie ustawiać pól na null dla pól dla, których nie podano wartości
+    public PlaylistDto updatePlaylist(String idUser, String playlistId , PlaylistDto playlistDto, Authentication authentication) {   //TODO po stronie Fronta trzeba będzie dać domyślne wartości (te które są zapisane obecnie) aby nie ustawiać pól na null dla pól dla, których nie podano wartości
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
                 .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
@@ -85,7 +108,7 @@ public class PlaylistService {
             throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + user.getActualUsername());
         }
 
-        if(!playlist.getName().equals(playlistDto.getName()) && playlistRepository.existsByName(playlistDto.getName())) {
+        if(!playlist.getName().equals(playlistDto.getName()) && playlistRepository.existsByNameAndUser(playlistDto.getName(), user)) {
             throw new DuplicateResourceException("Playlist with the name " + playlistDto.getName() + " already exists: ");
         }
 
@@ -97,9 +120,14 @@ public class PlaylistService {
         return PlaylistMapper.toDto(playlist);
     }
 
-    public List<PlaylistDto> deletePlaylist(String idUser, String playlistId) {
+    public List<PlaylistDto> deletePlaylist(String idUser, String playlistId, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Playlist playlist = playlistRepository.findByIdPlaylist(playlistId)
                 .orElseThrow(() -> new PlaylistNotFoundException("No playlist found with the id : " + playlistId));
@@ -118,12 +146,17 @@ public class PlaylistService {
 
         playlistRepository.delete(playlist);
 
-        return getPlaylists(idUser);
+        return user.getPlaylists().stream().map(PlaylistMapper::toDto).toList();
     }
 
-    public MovieDto addMovieToPlaylist(String idUser, String playlistId, MovieDto movieDto) {
+    public MovieDto addMovieToPlaylist(String idUser, String playlistId, MovieDto movieDto, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Movie movie = movieService.saveMovieOrReturnExisting(movieDto);
 
@@ -150,9 +183,14 @@ public class PlaylistService {
         return MovieMapper.toDto(movie);
     }
 
-    public List<MovieDto> deleteMovieFromPlaylist(String idUser, String playlistId, Long tmdbIdMovie) {
+    public List<MovieDto> deleteMovieFromPlaylist(String idUser, String playlistId, Long tmdbIdMovie, Authentication authentication) {
         User user = userRepository.findByIdUser(idUser)
                 .orElseThrow(() -> new UserNotFoundException("No user found with id: " + idUser));
+
+        String loggedInUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (!loggedInUsername.equals(user.getUsername())) {
+            throw new AccessDeniedException("Access denied");
+        }
 
         Movie movie = movieRepository.findByTmdbIdMovie(tmdbIdMovie)
                 .orElseThrow(() -> new MovieNotFoundException("No movie found with TMDB id: " + tmdbIdMovie));
@@ -163,10 +201,6 @@ public class PlaylistService {
         if(!playlistRepository.existsByIdPlaylistAndUser(playlistId, user)){
             throw new ResourceOwnershipException("Playlist with ID " + playlistId + " does not belong to the user " + user.getActualUsername());
         }
-
-//        if(!playlistRepository.existsByIdPlaylistAndMoviesTmdbIdMovie(playlistId, tmdbIdMovie)) {
-//            throw new RuntimeException("Movie with the TMDB id doesn't belong to the playlist with the id");
-//        }
 
         boolean isMoviePresentInPlaylist = playlist.getMovies().stream()
                 .anyMatch(m -> m.getTmdbIdMovie().equals(tmdbIdMovie));

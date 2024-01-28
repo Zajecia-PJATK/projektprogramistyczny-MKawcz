@@ -58,7 +58,7 @@ public class GenreService {
             if(optionalGenre.isPresent()) {
                 return optionalGenre.get();
             }
-            throw new GenreNotFoundException("No genre found with name"+ g.getName());
+            throw new GenreNotFoundException("No genre found with id "+ g.getTmdbIdGenre());
         }).toList();
     }
 

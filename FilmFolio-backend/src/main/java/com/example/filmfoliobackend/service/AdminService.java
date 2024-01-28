@@ -45,6 +45,10 @@ public class AdminService {
     }
 
     public MovieDto createMovie(MovieDto movieDto) {
+        if(movieRepository.existsByTmdbIdMovie(movieDto.getTmdbIdMovie()) && movieDto.getTmdbIdMovie() != null) {
+            throw new DuplicateResourceException("Movie with TMDB id: " + movieDto.getTmdbIdMovie() + " already exist");
+        }
+
         Movie movie = MovieMapper.toDocument(movieDto);
         movie.setIsCustom(true);
 

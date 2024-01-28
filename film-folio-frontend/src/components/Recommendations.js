@@ -58,6 +58,13 @@ const Recommendations = () => {
         }
     };
 
+    //recommendationsRef jest wykorzystywany jako referencja do elementu DOM w komponencie React.
+    //scrollLeft: Gdy ta funkcja jest wywoływana, sprawdza, czy recommendationsRef.current istnieje, co oznacza,
+    // że referencja do elementu DOM została już przypisana. Jeśli istnieje, używa metody scrollBy na tym elemencie,
+    // aby przesunąć jego zawartość o 200 pikseli w lewo (left: -200). Parametr behavior: 'smooth' sprawia, że przewijanie jest płynne.
+    //
+    // scrollRight: Podobnie jak scrollLeft, ale przewija kontener o 200 pikseli w prawo (left: 200).
+
     if (isLoading) {
         return <Loader />;
     }

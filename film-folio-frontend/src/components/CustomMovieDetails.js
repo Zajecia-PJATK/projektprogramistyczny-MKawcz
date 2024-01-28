@@ -55,13 +55,18 @@ const CustomMovieDetails = () => {
         setShowEditForm(!showEditForm);
     };
 
-    if (isLoading) {
+    if (isLoading || !movie) {
         return <Loader />;
     }
 
     return (
         <div className="movie-details">
-            <div className="movie-content" style={{backgroundImage: `url(${baseURL}${movie.backdrop_path})`}}>
+            <div
+                className="movie-content"
+                style={{
+                    backgroundImage: movie.backdrop_path ? `url(${baseURL}${movie.backdrop_path})` : 'none'
+                }}
+            >
                 {error && <p className="error">{error}</p>}
                 <div className="backdrop-overlay"></div>
                 <div className="movie-poster">
@@ -74,7 +79,7 @@ const CustomMovieDetails = () => {
                     <h1>{movie.title}</h1>
                     <p>{movie.overview}</p>
                     <p>Release date: {movie.release_date}</p>
-                    {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
+                    {movie.runtime && <span>Runtime: {movie.runtime}</span>}
                     <p>Adult: {movie.adult ? 'Yes' : 'No'}</p>
                 </div>
                 <div className="controls-container">

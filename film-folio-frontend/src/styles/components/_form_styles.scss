@@ -20,7 +20,7 @@
       margin-bottom: 20px;
     }
 
-    input, .button {
+    input, .button, select {
       width: calc(100% - 20px); // Odejmowanie paddingu
       margin: 10px 0; // Odstępy między inputami i przyciskiem
       padding: 10px;

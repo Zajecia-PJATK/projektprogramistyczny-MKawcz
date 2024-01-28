@@ -2,3 +2,7 @@
 @function calculate-rem($size) {
   @return $size / 16px * 1rem; // Przeliczenie na podstawie domyślnej wielkości fontu (16px).
 }
+
+//Skalowanie Względem Elementu
+// <html>: 1rem jest równy rozmiarowi fontu elementu
+// <html>. Jeśli rozmiar fontu <html> wynosi 16px (co jest często domyślną wartością), wtedy 1rem będzie równy 16px.

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface PlaylistRepository extends MongoRepository<Playlist, Long> {
-    Boolean existsByName(String name);
+    Boolean existsByNameAndUser(String name, User user);
     Optional<Playlist> findByIdPlaylist(String idPlaylist);
 
     Boolean existsByIdPlaylistAndUser(String playlistId, User user);

@@ -44,7 +44,7 @@ public class MovieService {
     private String apiUrl;
 
     @Async("taskExecutor")
-    public CompletableFuture<List<MovieDto>> getPopularMovies() {      //TODO można dodać zmianę page
+    public CompletableFuture<List<MovieDto>> getPopularMovies() {
         return CompletableFuture.supplyAsync(() -> {
             String url = String.format("%s/movie/popular?language=en-US&page=1&api_key=%s", apiUrl, apiKey);
             ResponseEntity<TMDBResponse> response = restTemplate.getForEntity(url, TMDBResponse.class);

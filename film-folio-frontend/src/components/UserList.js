@@ -8,8 +8,8 @@ const UserList = () => {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState('');
     const [loggedInUserId, setLoggedInUserId] = useState('');
-    const [isAdmin, setIsAdmin] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    // const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -20,10 +20,13 @@ const UserList = () => {
                     const decodedToken = jwtDecode(token);
                     const userId = decodedToken.userId;
                     setLoggedInUserId(userId);
-                    setIsAdmin(decodedToken.role.toString() === 'ROLE_ADMIN');
+                    const userIsAdmin = decodedToken.role.toString() === 'ROLE_ADMIN';
 
-                    if(!isAdmin) {
+                    setLoggedInUserId(userId);
+
+                    if(!userIsAdmin) {
                         setError("You do not have access to this page");
+                        setIsLoading(false);
                         return;
                     }
 

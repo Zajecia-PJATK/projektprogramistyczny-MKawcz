@@ -20,17 +20,22 @@ public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/tmdb/movies/**", "/api/users/register", "/api/users/login").permitAll()
-                        .requestMatchers("/api/tmdb/genres/**", "/api/users/**", "/api/watchlist/**", "/api/playlists/**", "/api/movies/**", "/api/recommendations/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/tmdb/movies/**", "/api/users/register", "/api/users/login", "/api/recommendations/**").permitAll()
+                        .requestMatchers("/api/tmdb/genres/**", "/api/users/**", "/api/watchlist/**", "/api/playlists/**", "/api/movies/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(customizer -> customizer
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

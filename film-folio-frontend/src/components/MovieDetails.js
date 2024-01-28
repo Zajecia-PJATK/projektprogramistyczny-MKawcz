@@ -59,6 +59,7 @@ const MovieDetails = () => {
         };
 
         const fetchMovieCast = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
@@ -75,6 +76,7 @@ const MovieDetails = () => {
                     const data = await response.json();
                     setCast(data);
                     setError('');
+                    setIsLoading(false);
                 }
             } catch (err) {
                 setError(err.message);
@@ -145,6 +147,9 @@ const MovieDetails = () => {
                     adult: movie.adult,
                     genres: movie.genres.map(genre => ({id: genre.id, name: genre.name}))
                 };
+
+                console.log(movieData);
+
                 const response = await fetch(`http://localhost:8080/api/watchlist?idUser=${idUser}`, {
                     method: 'POST',
                     headers: {
@@ -179,14 +184,19 @@ const MovieDetails = () => {
         }
     };
 
-    if (isLoading) {
+    if (isLoading || !movie) {
         return <Loader />;
     }
 
     return (
         <div className="movie-details">
 
-            <div className="movie-content" style={{backgroundImage: `url(${baseURL}${movie.backdrop_path})`}}>
+            <div
+                className="movie-content"
+                style={{
+                    backgroundImage: movie.backdrop_path ? `url(${baseURL}${movie.backdrop_path})` : 'none'
+                }}
+            >
                 <div className="backdrop-overlay"></div>
                 <div className="movie-poster">
                     <img
@@ -200,7 +210,7 @@ const MovieDetails = () => {
                     <p>{movie.overview}</p>
                     <p>Average rating: {movie.vote_average} (number of votes: {movie.vote_count})</p>
                     <p>Release date: {movie.release_date}</p>
-                    {movie.runtime && <p>Runtime: {movie.runtime} minutes</p>}
+                    {movie.runtime && <span className="runtime">Runtime: {movie.runtime}</span>}
                     <p>Adult: {movie.adult ? 'Yes' : 'No'}</p>
                     <p>Genres:</p>
                     <ul>
@@ -225,8 +235,8 @@ const MovieDetails = () => {
             <div className="movie-cast">
                 <h1>Cast</h1>
                 {cast.length !== 0 &&
-                <div className="cast-container">
-                    <button className="scroll-btn left" onClick={scrollLeft}>&lt;</button>
+                    <div className="cast-container">
+                        <button className="scroll-btn left" onClick={scrollLeft}>&lt;</button>
                     <ul ref={castRef} className="cast">
                         {cast.map(actor => (
                             <li key={actor.id} className="cast-item">

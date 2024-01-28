@@ -3,8 +3,10 @@ package com.example.filmfoliobackend.service;
 
 import com.example.filmfoliobackend.dto.UserDto;
 import com.example.filmfoliobackend.exception.DuplicateResourceException;
+import com.example.filmfoliobackend.exception.InvalidRequestException;
 import com.example.filmfoliobackend.exception.UserNotFoundException;
 import com.example.filmfoliobackend.jwt.JwtTokenProvider;
+import com.example.filmfoliobackend.mapper.UserMapper;
 import com.example.filmfoliobackend.model.User;
 import com.example.filmfoliobackend.model.enums.Role;
 import com.example.filmfoliobackend.repository.UserRepository;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -28,7 +31,7 @@ public class AuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username is already taken");
         }
@@ -37,17 +40,22 @@ public class AuthenticationService {
             throw new DuplicateResourceException("Email is already taken");
         }
 
+        if(request.getRole() == null || (!Objects.equals(request.getRole().toString(), "ROLE_ADMIN") && !Objects.equals(request.getRole().toString(), "ROLE_USER"))) {
+            throw new InvalidRequestException("Role has to be either ROLE_ADMIN or ROLE_USER");
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .roles(Set.of(Role.ROLE_USER))
+                .roles(Set.of(request.getRole()))
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtTokenProvider.generateToken(user);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+//        var jwtToken = jwtTokenProvider.generateToken(user);
+//        return AuthenticationResponse.builder()
+//                .token(jwtToken)
+//                .build();
+        return user.getActualUsername();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {

@@ -54,7 +54,7 @@ const MovieSearch = () => {
             </div>
             <div className="movies-container">
                 {error && <div className="error">{error}</div>}
-                {movies.length === 0 && <di>Brak wyników :(</di>}
+                {movies.length === 0 && <div>Brak wyników :(</div>}
                 {movies.map((movie, index) => (
                     <div key={movie.id} data-index={index + 1} className="movie-item">
                         <Link to={`/movies/${movie.id}`}>

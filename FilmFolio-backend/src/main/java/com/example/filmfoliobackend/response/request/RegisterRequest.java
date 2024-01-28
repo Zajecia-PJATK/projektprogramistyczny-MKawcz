@@ -1,5 +1,6 @@
 package com.example.filmfoliobackend.response.request;
 
+import com.example.filmfoliobackend.model.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -24,6 +25,6 @@ public class RegisterRequest {
     private String password;
 
     //    @EnumNamePattern(regexp = "ROLE_ADMIN|ROLE_USER")
-//    private Role role;
+    private Role role;
 
 }

@@ -1,79 +1,73 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
 import '../styles/components/_form_styles.scss';
 
+const LoginSchema = Yup.object().shape({
+    email: Yup.string()
+        .matches(/^[\w-.]+@([\w-]+\.)+[\w-]+$/, 'Provided email has an invalid format')
+        .required('Email is required'),
+    password: Yup.string()
+        .required('Password is required'),
+});
+
 const LoginForm = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate(); // Hook do zarządzania nawigacją
-    const [error, setError] = useState('');
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateEmail(email)) {
-            setError('Provided email has an invalid format');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:8080/api/users/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-            const data = await response.json();
-            localStorage.setItem('token', data.token); // Zapisanie tokena
-            navigate('/profile');
-        } catch (err) {
-            setError(err.message);
-        }
-    }
-
-    const validateEmail = (email) => {
-        const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]+$/;
-        return emailRegex.test(email);
-    };
+    const navigate = useNavigate();
 
     const handleGoToRegistration = () => {
         navigate('/');
     };
 
-
     return (
         <div className="centered-container">
             <div className="form-container">
                 <img src={require('../filmFolio.png')} alt="FilmFolio Logo" className="logo"/>
-                {error && <p className="error">{error}</p>}
-                <form noValidate onSubmit={handleSubmit}>
-                    <div>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                        />
-                    </div>
-                    <div>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                        />
-                    </div>
-                    <div>
-                        <button className="button" type="submit">Log in</button>
-                    </div>
-                </form>
+                <Formik
+                    initialValues={{ email: '', password: '' }}
+                    validationSchema={LoginSchema}
+                    onSubmit={async (values, { setSubmitting, setStatus }) => {
+                        try {
+                            const response = await fetch('http://localhost:8080/api/users/login', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(values),
+                            });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.message);
+                            }
+
+                            const data = await response.json();
+                            localStorage.setItem('token', data.token);
+                            navigate('/profile');
+                        } catch (err) {
+                            setStatus({ error: err.message });
+                        }
+
+                        setSubmitting(false);
+                    }}
+                >
+                    {({ errors, touched, status }) => (
+                        <Form noValidate>
+                            {status && status.error && <p className="error">{status.error}</p>}
+                            <div>
+                                <Field type="email" name="email" placeholder="Email" />
+                                {errors.email && touched.email ? (<div className="error">{errors.email}</div>) : null}
+                            </div>
+                            <div>
+                                <Field type="password" name="password" placeholder="Password" />
+                                {errors.password && touched.password ? (<div className="error">{errors.password}</div>) : null}
+                            </div>
+                            <div>
+                                <button className="button" type="submit">Log in</button>
+                            </div>
+                        </Form>
+                    )}
+                </Formik>
                 <p>Or</p>
-                <button className="button" type="submit" onClick={handleGoToRegistration}>Got to Registration</button>
+                <button className="button" onClick={handleGoToRegistration}>Go to Registration</button>
             </div>
         </div>
     );
